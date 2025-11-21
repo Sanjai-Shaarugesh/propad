@@ -1,0 +1,49 @@
+[project]
+name = "propad"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "markdown>=3.10",
+    "pygobject>=3.54.5",
+    "pygobject-stubs>=2.14.0",
+]
+
+
+[dependency-groups]
+dev = [
+    "pygobject-stubs>=2.13.0",
+    "ruff>=0.14.5",
+]
+
+
+
+
+
+[tool.basedpyright]
+reportMissingModuleSource = "none"
+reportMissingImports = "none"
+reportAttributeAccessIssue = "none"
+reportUntypedClassDecorator = false
+reportUnannotatedClassAttribute = false
+reportMissingParameterType = false
+reportUnknownMemberType = "none"
+reportUntypedBaseClass = "none"
+reportUnknownParameterType = "none"
+reportUnknownVariableType = "none"
+reportUnusedParameter = "none"
+reportUnknownArgumentType = "none"
+reportImplicitOverride = "none"
+reportAny = "none"
+reportUnusedCallResult = "none"
+reportUnknownLambdaType ="none"
+
+
+[tool.ruff]
+lint.ignore = ["E402"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["gi"]
+
+
