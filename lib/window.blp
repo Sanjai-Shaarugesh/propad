@@ -3,15 +3,15 @@ using Adw 1;
 
 template $Window: Adw.ApplicationWindow {
   title: "propad";
-  default-width: 683;
-  default-height: 384;
+  default-width: 853;
+  default-height: 634;
   
   content: Adw.MultiLayoutView adw_multi_layout_view {
     Adw.Layout {
       name: "desktop";
       
       content: Adw.OverlaySplitView adw_overlay_split_view {
-        min-sidebar-width: 350;
+        min-sidebar-width: 450;
         max-sidebar-width: 500;
         
         sidebar: Adw.LayoutSlot {

@@ -8,8 +8,8 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
   <requires lib="gtk" version="4.0"/>
   <template class="Window" parent="AdwApplicationWindow">
     <property name="title">propad</property>
-    <property name="default-width">683</property>
-    <property name="default-height">384</property>
+    <property name="default-width">853</property>
+    <property name="default-height">634</property>
     <property name="content">
       <object class="AdwMultiLayoutView" id="adw_multi_layout_view">
         <child>
@@ -17,7 +17,7 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
             <property name="name">desktop</property>
             <property name="content">
               <object class="AdwOverlaySplitView" id="adw_overlay_split_view">
-                <property name="min-sidebar-width">350</property>
+                <property name="min-sidebar-width">450</property>
                 <property name="max-sidebar-width">500</property>
                 <property name="sidebar">
                   <object class="AdwLayoutSlot">
