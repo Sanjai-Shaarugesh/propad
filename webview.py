@@ -8,6 +8,7 @@ from gi.repository import Gtk, WebKit, Adw
 from typing import Optional
 import comrak
 import re
+import os
 
 UI_FILE = "ui/webview.ui"
 
@@ -260,6 +261,17 @@ class WebViewWidget(Gtk.Box):
         """
         self.webview.evaluate_javascript(js_code, -1, None, None, None)
 
+    def _load_external_file(self, filename: str) -> str:
+        """Load content from an external file."""
+        try:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            file_path = os.path.join(script_dir, filename)
+            with open(file_path, "r", encoding="utf-8") as f:
+                return f.read()
+        except Exception as e:
+            print(f"Error loading {filename}: {e}")
+            return ""
+
     def load_html(self, html: str, is_dark: Optional[bool] = None):
         """Load HTML content and apply the theme immediately."""
         if is_dark is None:
@@ -286,6 +298,13 @@ class WebViewWidget(Gtk.Box):
         # Process GitHub-style alerts
         processed_html = self._process_github_alerts(processed_html)
 
+        # Load external CSS and JS files
+        css_content = self._load_external_file("assets/styles.css")
+        js_mermaid = self._load_external_file("assets/mermaid-loader.js")
+        js_mathjax_config = self._load_external_file("assets/mathjax-config.js")
+        js_mathjax_render = self._load_external_file("assets/mathjax-render.js")
+
+        # Get theme colors
         bg_color = "#1e1e1e" if is_dark else "#ffffff"
         text_color = "#d4d4d4" if is_dark else "#1e1e1e"
         link_color = "#4fc3f7" if is_dark else "#0066cc"
@@ -336,319 +355,57 @@ class WebViewWidget(Gtk.Box):
             caution_border = "#ef4444"
             caution_icon = "#991b1b"
 
+        # Replace CSS variables with actual values
+        css_with_theme = (
+            css_content.replace("{bg_color}", bg_color)
+            .replace("{text_color}", text_color)
+            .replace("{link_color}", link_color)
+            .replace("{code_bg}", code_bg)
+            .replace("{pre_bg}", pre_bg)
+            .replace("{border_color}", border_color)
+            .replace("{note_bg}", note_bg)
+            .replace("{note_border}", note_border)
+            .replace("{note_icon}", note_icon)
+            .replace("{tip_bg}", tip_bg)
+            .replace("{tip_border}", tip_border)
+            .replace("{tip_icon}", tip_icon)
+            .replace("{important_bg}", important_bg)
+            .replace("{important_border}", important_border)
+            .replace("{important_icon}", important_icon)
+            .replace("{warning_bg}", warning_bg)
+            .replace("{warning_border}", warning_border)
+            .replace("{warning_icon}", warning_icon)
+            .replace("{caution_bg}", caution_bg)
+            .replace("{caution_border}", caution_border)
+            .replace("{caution_icon}", caution_icon)
+        )
+
+        # Replace JS variables with actual values
+        js_mermaid_with_theme = js_mermaid.replace("{mermaid_theme}", mermaid_theme)
+
         html_content = f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style id="theme-style">
-* {{
-    box-sizing: border-box;
-}}
-body {{ 
-    background: {bg_color}; 
-    color: {text_color}; 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
-    padding: 20px; 
-    line-height: 1.6;
-    max-width: 900px;
-    margin: 0 auto;
-}}
-a {{ 
-    color: {link_color}; 
-    text-decoration: none;
-}}
-a:hover {{
-    text-decoration: underline;
-}}
-code {{ 
-    background: {code_bg}; 
-    padding: 2px 6px; 
-    border-radius: 3px; 
-    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-    font-size: 0.9em;
-}}
-pre {{ 
-    background: {pre_bg}; 
-    padding: 16px; 
-    border-radius: 6px; 
-    overflow-x: auto;
-    border: 1px solid {border_color};
-}}
-pre code {{ 
-    background: none; 
-    padding: 0; 
-}}
-blockquote {{
-    border-left: 4px solid {border_color};
-    padding-left: 16px;
-    margin-left: 0;
-    color: {text_color};
-    opacity: 0.8;
-}}
-table {{
-    border-collapse: collapse;
-    width: 100%;
-    margin: 16px 0;
-}}
-th, td {{
-    border: 1px solid {border_color};
-    padding: 8px 12px;
-    text-align: left;
-}}
-th {{
-    background: {code_bg};
-    font-weight: 600;
-}}
-
-/* Mermaid diagram container */
-.mermaid {{
-    text-align: center;
-    margin: 20px 0;
-    background: transparent;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100px;
-}}
-
-/* Ensure SVG from mermaid is visible */
-.mermaid svg {{
-    max-width: 100%;
-    height: auto;
-}}
-
-/* GitHub-style alerts */
-.alert {{
-    padding: 12px 16px;
-    margin: 16px 0;
-    border-left: 4px solid;
-    border-radius: 6px;
-    position: relative;
-}}
-.alert::before {{
-    content: '';
-    font-weight: 600;
-    margin-right: 8px;
-    font-size: 16px;
-}}
-.alert-note {{
-    background: {note_bg};
-    border-color: {note_border};
-}}
-.alert-note::before {{
-    content: '📘 NOTE';
-    color: {note_icon};
-}}
-.alert-tip {{
-    background: {tip_bg};
-    border-color: {tip_border};
-}}
-.alert-tip::before {{
-    content: '💡 TIP';
-    color: {tip_icon};
-}}
-.alert-important {{
-    background: {important_bg};
-    border-color: {important_border};
-}}
-.alert-important::before {{
-    content: '❗ IMPORTANT';
-    color: {important_icon};
-}}
-.alert-warning {{
-    background: {warning_bg};
-    border-color: {warning_border};
-}}
-.alert-warning::before {{
-    content: '⚠️ WARNING';
-    color: {warning_icon};
-}}
-.alert-caution {{
-    background: {caution_bg};
-    border-color: {caution_border};
-}}
-.alert-caution::before {{
-    content: '🚫 CAUTION';
-    color: {caution_icon};
-}}
-.alert p:first-child {{
-    margin-top: 0;
-}}
-.alert p:last-child {{
-    margin-bottom: 0;
-}}
-
-h1, h2, h3, h4, h5, h6 {{
-    margin-top: 24px;
-    margin-bottom: 16px;
-    font-weight: 600;
-    line-height: 1.25;
-}}
-h1 {{
-    font-size: 2em;
-    border-bottom: 1px solid {border_color};
-    padding-bottom: 8px;
-}}
-h2 {{
-    font-size: 1.5em;
-    border-bottom: 1px solid {border_color};
-    padding-bottom: 8px;
-}}
-ul, ol {{
-    padding-left: 2em;
-}}
-li {{
-    margin: 4px 0;
-}}
-hr {{
-    border: none;
-    border-top: 2px solid {border_color};
-    margin: 24px 0;
-}}
-img {{
-    max-width: 100%;
-    height: auto;
-}}
-
-/* MathJax styling */
-.MathJax {{
-    outline: 0;
-}}
-mjx-container {{
-    display: inline-block;
-    margin: 0 2px;
-}}
-mjx-container[display="true"] {{
-    display: block;
-    text-align: center;
-    margin: 1em 0;
-}}
+{css_with_theme}
 </style>
 
 <!-- Mermaid for diagrams (Latest Version v11) - Load FIRST -->
 <script type="module">
-import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-
-mermaid.initialize({{ 
-    startOnLoad: false,  // Changed to false for manual control
-    theme: '{mermaid_theme}',
-    securityLevel: 'loose',
-    logLevel: 'debug',  // Changed to debug to see what's happening
-    flowchart: {{
-        useMaxWidth: true,
-        htmlLabels: true,
-        curve: 'basis'
-    }},
-    sequence: {{
-        useMaxWidth: true,
-        wrap: true
-    }},
-    gantt: {{
-        useMaxWidth: true
-    }},
-    er: {{
-        useMaxWidth: true
-    }},
-    pie: {{
-        useMaxWidth: true
-    }},
-    quadrantChart: {{
-        useMaxWidth: true
-    }},
-    xyChart: {{
-        useMaxWidth: true
-    }},
-    timeline: {{
-        useMaxWidth: true
-    }},
-    mindmap: {{
-        useMaxWidth: true
-    }},
-    gitGraph: {{
-        useMaxWidth: true
-    }},
-    c4: {{
-        useMaxWidth: true
-    }},
-    sankey: {{
-        useMaxWidth: true
-    }},
-    block: {{
-        useMaxWidth: true
-    }}
-}});
-
-// Render Mermaid diagrams - try multiple times to ensure rendering
-async function renderMermaid() {{
-    try {{
-        const mermaidElements = document.querySelectorAll('.mermaid');
-        console.log('Found mermaid elements:', mermaidElements.length);
-        
-        if (mermaidElements.length > 0) {{
-            mermaidElements.forEach(el => {{
-                console.log('Mermaid content:', el.textContent.substring(0, 100));
-            }});
-            
-            await mermaid.run({{
-                querySelector: '.mermaid'
-            }});
-            console.log('Mermaid rendering complete');
-        }}
-    }} catch (error) {{
-        console.error('Mermaid rendering error:', error);
-    }}
-}}
-
-// Try rendering on multiple events to ensure it works
-window.addEventListener('DOMContentLoaded', renderMermaid);
-window.addEventListener('load', renderMermaid);
-
-// Also expose function globally in case we need to trigger it manually
-window.renderMermaid = renderMermaid;
+{js_mermaid_with_theme}
 </script>
 
 <!-- MathJax for LaTeX (Full Support) -->
 <script>
-window.MathJax = {{
-    tex: {{
-        inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
-        displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']],
-        processEscapes: true,
-        processEnvironments: true,
-        packages: {{'[+]': ['ams', 'newcommand', 'configmacros', 'action', 'unicode']}},
-        tags: 'ams',
-        macros: {{
-            RR: '{{\\\\mathbb{{R}}}}',
-            NN: '{{\\\\mathbb{{N}}}}',
-            ZZ: '{{\\\\mathbb{{Z}}}}',
-            QQ: '{{\\\\mathbb{{Q}}}}',
-            CC: '{{\\\\mathbb{{C}}}}'
-        }}
-    }},
-    svg: {{
-        fontCache: 'global'
-    }},
-    options: {{
-        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-        ignoreHtmlClass: 'no-mathjax'
-    }},
-    startup: {{
-        pageReady: () => {{
-            return MathJax.startup.defaultPageReady();
-        }}
-    }}
-}};
+{js_mathjax_config}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 <!-- Ensure MathJax renders after page load -->
 <script>
-window.addEventListener('load', () => {{
-    if (window.MathJax) {{
-        MathJax.typesetPromise().catch((err) => console.log('MathJax error:', err));
-    }}
-}});
+{js_mathjax_render}
 </script>
 </head>
 <body>
