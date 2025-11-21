@@ -18,21 +18,35 @@ class SidebarWidget(Gtk.Box):
             kwargs["orientation"] = Gtk.Orientation.VERTICAL
         super().__init__(**kwargs)
 
-        # Initialize buffer reference
         self.buffer = self.textview.get_buffer()
 
+        # Custom callbacks list
+        self._text_changed_callbacks = []
+
+        # Connect GTK buffer "changed" signal
+        self.buffer.connect("changed", self._on_buffer_changed)
+
+    def _on_buffer_changed(self, buffer):
+        """Call all registered callbacks when text changes."""
+        for callback in self._text_changed_callbacks:
+            callback(self.get_text())
+
+    def connect_text_changed(self, callback):
+        """Register a callback for text changes."""
+        self._text_changed_callbacks.append(callback)
+
     def get_text(self):
-        """Get the current text from the TextView."""
-        buffer = self.textview.get_buffer()
-        start_iter = buffer.get_start_iter()
-        end_iter = buffer.get_end_iter()
-        text_content = buffer.get_text(start_iter, end_iter, True)
-        return text_content
+        start_iter = self.buffer.get_start_iter()
+        end_iter = self.buffer.get_end_iter()
+        return self.buffer.get_text(start_iter, end_iter, True)
 
     def set_text(self, text: str):
-        """Set text in the TextView."""
+        """Set text and trigger callbacks."""
         self.buffer.set_text(text)
+        for callback in self._text_changed_callbacks:
+            callback(text)
 
     def clear(self):
-        """Clear the TextView."""
         self.buffer.set_text("")
+        for callback in self._text_changed_callbacks:
+            callback("")

@@ -1,6 +1,5 @@
 import gi
 
-import md_to_html
 
 gi.require_version(namespace="Gtk", version="4.0")
 gi.require_version(namespace="Adw", version="1")
@@ -8,7 +7,7 @@ gi.require_version(namespace="Adw", version="1")
 from gi.repository import Adw, Gtk
 from sidebar import SidebarWidget
 from webview import WebViewWidget
-from md_to_html import md
+
 import comrak
 
 UI_FILE = "ui/window.ui"
@@ -44,16 +43,32 @@ class Window(Adw.ApplicationWindow):
         self.sidebar_widget = SidebarWidget()
         self.webview_widget = WebViewWidget()
 
-        # Connect to text buffer changes
-        buffer = self.sidebar_widget.textview.get_buffer()
-        buffer.connect("changed", self._on_text_changed)
+        # REMOVED: buffer.connect("changed", self._on_text_changed)
+        # This was causing the issue - it didn't pass is_dark parameter
 
         # starting text to start
-        self.sidebar_widget.set_text("starting writing")
+        initial_text = "starting writing"
+        initial_html = comrak.render_markdown(
+            initial_text, extension_options=comrak.ExtensionOptions()
+        )
 
         # desktop view initially
         self.sidebar_container.append(self.sidebar_widget)
         self.webview_container.append(self.webview_widget)
+
+        # Set initial text and render
+        self.sidebar_widget.set_text(initial_text)
+        self.webview_widget.load_html(initial_html, is_dark=self.is_dark_mode())
+
+        # Connect to text buffer changes with proper theme handling
+        def on_text_update(text):
+            html = comrak.render_markdown(
+                text, extension_options=comrak.ExtensionOptions()
+            )
+            # Get dark mode status at the time of the callback
+            self.webview_widget.load_html(html, is_dark=self.is_dark_mode())
+
+        self.sidebar_widget.connect_text_changed(on_text_update)
 
         # Show sidebar by default on desktop
         self.adw_overlay_split_view.set_show_sidebar(True)
@@ -66,14 +81,11 @@ class Window(Adw.ApplicationWindow):
         # Set initial layout
         self._on_layout_changed(self.adw_multi_layout_view, None)
 
-    def _on_text_changed(self, buffer):
-        """Called whenever the text in the sidebar changes."""
-
-        text = self.sidebar_widget.get_text()
-        opts = comrak.ExtensionOptions()
-        self.md = comrak.render_markdown(text, extension_options=opts)
-        self.webview_widget.load_html(self.md)
-        return text
+    def is_dark_mode(self) -> bool:
+        """Check if the current GTK theme is dark."""
+        # Use Adw.StyleManager for accurate theme detection
+        style_manager = Adw.StyleManager.get_default()
+        return style_manager.get_dark()
 
     def _on_toggle_sidebar(self, button: Gtk.Button) -> None:
         """Toggle sidebar visibility."""
