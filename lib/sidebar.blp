@@ -1,0 +1,32 @@
+using Gtk 4.0;
+
+template $SidebarWidget: Gtk.Box {
+  orientation: vertical;
+  hexpand: true;
+  vexpand: true;
+
+  ScrolledWindow {
+    hexpand: true;
+    vexpand: true;
+    hscrollbar-policy: automatic;
+    vscrollbar-policy: automatic;
+    has-frame: false;
+    
+    Overlay {
+      TextView textview {
+        name: "textview";
+        wrap-mode: word_char;
+        accepts-tab: true;
+        editable: true;
+        cursor-visible: true;
+        top-margin: 20;
+        bottom-margin: 20;
+        left-margin: 20;
+        right-margin: 20;
+        pixels-above-lines: 8;
+        pixels-below-lines: 4;
+        indent: 0;
+      }
+    }
+  }
+}

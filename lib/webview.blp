@@ -5,8 +5,9 @@ template $WebViewWidget: Gtk.Box {
   hexpand: true;
   vexpand: true;
 
-  Box webview_container {
+  Gtk.Box webview_container {
     name: "webview_container";
+    orientation: vertical;
     hexpand: true;
     vexpand: true;
   }

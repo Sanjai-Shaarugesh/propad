@@ -6,45 +6,11 @@ import sys
 
 gi.require_version(namespace="Gtk", version="4.0")
 gi.require_version(namespace="Adw", version="1")
-gi.require_version(namespace="WebKit", version="6.0")
 
-from gi.repository import Adw, Gio, Gtk, WebKit
-
-
-UI_FILE = "ui/window.ui"
-
+from gi.repository import Adw, Gio, Gtk
+from window import Window
 
 Adw.init()
-
-
-@Gtk.Template(filename=UI_FILE)
-class Window(Adw.ApplicationWindow):
-    __gtype_name__ = "Window"
-
-    toggle_sidebar_btn = Gtk.Template.Child()
-    adw_overlay_split_view = Gtk.Template.Child()
-    webview_container = Gtk.Template.Child()
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        self.toggle_sidebar_btn.connect(
-            "clicked",
-            lambda b: self.adw_overlay_split_view.set_show_sidebar(
-                not self.adw_overlay_split_view.get_show_sidebar()
-            ),
-        )
-
-        # Create WebView directly
-        self.webview = WebKit.WebView.new()
-        settings = self.webview.get_settings()
-        settings.set_enable_javascript(True)
-
-        self.webview.set_hexpand(True)
-        self.webview.set_vexpand(True)
-
-        self.webview_container.append(self.webview)
-        self.webview.load_uri("https://www.example.com")
 
 
 class Application(Adw.Application):
@@ -54,6 +20,7 @@ class Application(Adw.Application):
         )
 
         self.create_action("quit", self.exit_app, ["<primary>q"])
+        self.create_action("toggle-sidebar", self.toggle_sidebar, ["<primary>b"])
 
     def do_activate(self):
         win = self.props.active_window
@@ -70,9 +37,18 @@ class Application(Adw.Application):
         Gtk.Application.do_shutdown(self)
 
     def exit_app(self, action, param):
+        """Quit the application."""
         self.quit()
 
+    def toggle_sidebar(self, action, param):
+        """Toggle sidebar visibility."""
+        win = self.props.active_window
+        if win:
+            overlay = win.adw_overlay_split_view
+            overlay.set_show_sidebar(not overlay.get_show_sidebar())
+
     def create_action(self, name, callback, shortcuts=None):
+        """Create an application action."""
         action = Gio.SimpleAction.new(name=name, parameter_type=None)
         action.connect("activate", callback)
         self.add_action(action=action)

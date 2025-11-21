@@ -1,5 +1,6 @@
 build-ui:
     blueprint-compiler compile lib/window.blp > ui/window.ui
+    blueprint-compiler compile lib/sidebar.blp > ui/sidebar.ui
     blueprint-compiler compile lib/webview.blp > ui/webview.ui
 
 format:build-ui

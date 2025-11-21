@@ -1,124 +1,117 @@
 using Gtk 4.0;
 using Adw 1;
 
-
-template $Window :Adw.ApplicationWindow {
+template $Window: Adw.ApplicationWindow {
   title: "propad";
   default-width: 683;
   default-height: 384;
   
   content: Adw.MultiLayoutView adw_multi_layout_view {
-      Adw.Layout {
-        name: "desktop";
-        
-        content: Adw.OverlaySplitView adw_overlay_split_view {
+    Adw.Layout {
+      name: "desktop";
+      
+      content: Adw.OverlaySplitView adw_overlay_split_view {
         min-sidebar-width: 350;
-         max-sidebar-width: 500;
-            sidebar: Adw.LayoutSlot slot_sidebar {
-              id: "slot_sidebar";
-          
-          };
-          content: Adw.LayoutSlot {
-            id: "slot-content";
-          };
+        max-sidebar-width: 500;
+        
+        sidebar: Adw.LayoutSlot {
+          id: "slot_sidebar";
         };
         
-      }
+        content: Adw.LayoutSlot {
+          id: "slot-content";
+        };
+      };
+    }
+    
+    Adw.Layout {
+      name: "mobile";
       
-      //Layout 02
-      Adw.Layout {
-        name:"mobile";
-        
-        content: Adw.ToolbarView {
-          [top]
-          Adw.HeaderBar header_bar {
-            title-widget: Adw.ViewSwitcher {
-              stack: stack;
-              policy: wide;
+      content: Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar header_bar {
+          title-widget: Adw.ViewSwitcher {
+            stack: stack;
+            policy: wide;
+          };
+        }
+    
+        [bottom]
+        Adw.ViewSwitcherBar switcher_bar {
+          stack: stack;
+          reveal: false;
+        }
+    
+        content: Adw.ViewStack stack {
+          Adw.ViewStackPage {
+            name: "webview_page";
+            title: "WebView";
+            icon-name: "globe-symbolic";
+    
+            child: Adw.LayoutSlot {
+              id: "mobile-webview-slot";
             };
           }
-      
-          [bottom]
-          Adw.ViewSwitcherBar switcher_bar {
-            stack: stack;
+    
+          Adw.ViewStackPage {
+            name: "editor_page";
+            title: "Editor";
+            icon-name: "document-edit-symbolic";
+    
+            child: Adw.LayoutSlot {
+              id: "mobile-editor-slot";
+            };
           }
-      
-          content: Adw.ViewStack stack {
-            Adw.ViewStackPage {
-              name: "webview_page";
-              title: "WebView";
-              icon-name: "user-desktop-symbolic";
-      
-              child: Adw.StatusPage {
-                title: "WebView Page";
-              };
-            }
-      
-            Adw.ViewStackPage {
-              name: "page2";
-              title: "Page 02";
-              icon-name: "user-home-symbolic";
-      
-              child: TextView {
-              
-              };
-            }
-          };
         };
+      };
+    }
+    
+    [slot_sidebar]
+    Gtk.Box sidebar_container {
+      name: "sidebar_container";
+      orientation: vertical;
+      hexpand: true;
+      vexpand: true;
+    }
+    
+    [slot-content]
+    Adw.ToolbarView {
+      [top]
+      Adw.HeaderBar {
+        [start]
+        Gtk.Button toggle_sidebar_btn {
+          icon-name: "sidebar-show-symbolic";
+          tooltip-text: "Toggle Sidebar";
+        }
       }
       
-      [slot_sidebar]
-      Gtk.Box {
-      
+      content: Gtk.Box webview_container {
+        name: "webview_container";
         orientation: vertical;
         hexpand: true;
         vexpand: true;
-        ScrolledWindow {
-          hexpand: true;
-          vexpand: true;
-          hscrollbar-policy: automatic;
-          vscrollbar-policy: automatic;
-          has-frame: false;
-          Overlay {
-          
-          TextView {
-            name: "textview";
-            wrap-mode: word_char;
-            accepts-tab: true;
-            editable: true;
-            cursor-visible: true;
-            top-margin: 20;
-            bottom-margin: 20;
-            pixels-above-lines: 8;
-            pixels-below-lines: 4;
-            indent: 0;
-          }
-          }
-        }
-        }
-      
-      
-      [slot-content]
-      Adw.ToolbarView {
-        [top]
-        Adw.HeaderBar {
-          [start]
-          Gtk.Button toggle_sidebar_btn {
-          icon-name: "open-menu-symbolic";
-          }
-        }
-        
-        content: Gtk.Box webview_container {
-          name: "webview_container";
-          orientation: vertical;
-          hexpand: true;
-          vexpand: true;
-        };
-      } 
+      };
+    }
+    
+    [mobile-webview-slot]
+    Gtk.Box mobile_webview_container {
+      name: "mobile_webview_container";
+      orientation: vertical;
+      hexpand: true;
+      vexpand: true;
+    }
+    
+    [mobile-editor-slot]
+    Gtk.Box mobile_sidebar_container {
+      name: "mobile_sidebar_container";
+      orientation: vertical;
+      hexpand: true;
+      vexpand: true;
+    }
   };
   
   Adw.Breakpoint {
-    condition ("max-width:600")
+    condition ("max-width: 600sp")
     
     setters {
       adw_multi_layout_view.layout-name: "mobile";
