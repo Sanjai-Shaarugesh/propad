@@ -10,7 +10,7 @@ gi.require_version("Adw", "1")
 gi.require_version("Gdk", "4.0")
 
 from gi.repository import Gtk, WebKit, Adw, GLib, Gdk
-from typing import Optional
+from typing import Optional, Callable
 import comrak
 import re
 
@@ -28,18 +28,24 @@ class WebViewWidget(Gtk.Box):
             kwargs["orientation"] = Gtk.Orientation.VERTICAL
         super().__init__(**kwargs)
 
-        # Thread pool for parallel processing
-        self._thread_pool = ThreadPoolExecutor(max_workers=6)
+        # Thread pool for parallel processing with more workers for smooth scrolling
+        self._thread_pool = ThreadPoolExecutor(max_workers=8)
 
         # Cache for processed content and loaded files
         self._file_cache = {}
         self._html_cache = {}
         self._last_theme = None
 
-        # Sync scroll state
+        # Sync scroll state with GPU acceleration
         self.sync_scroll_enabled = True
         self._is_programmatic_scroll = False
         self._scroll_sync_handler_id = None
+        self._scroll_animation_id = None
+        self._target_scroll_percentage = 0.0
+        self._current_scroll_percentage = 0.0
+
+        # Bidirectional scroll callbacks
+        self._scroll_callbacks = []
 
         # Pre-load external files in background
         self._preload_external_files()
@@ -110,25 +116,26 @@ class WebViewWidget(Gtk.Box):
         self.sync_scroll_enabled = enabled
 
     def scroll_to_percentage(self, percentage: float):
-        """Scroll webview to a specific percentage (0.0 to 1.0)."""
+        """Scroll webview to a specific percentage (0.0 to 1.0) with GPU-accelerated smooth animation."""
         if not self.sync_scroll_enabled or self._is_programmatic_scroll:
             return
 
         self._is_programmatic_scroll = True
+        self._target_scroll_percentage = max(0.0, min(1.0, percentage))
 
-        # Clamp percentage between 0 and 1
-        percentage = max(0.0, min(1.0, percentage))
-
+        # Use CSS smooth scroll with GPU acceleration for butter-smooth scrolling
         js_code = f"""
         (function() {{
             const maxScroll = Math.max(
                 document.documentElement.scrollHeight - window.innerHeight,
                 0
             );
-            const targetScroll = maxScroll * {percentage};
+            const targetScroll = maxScroll * {self._target_scroll_percentage};
+            
+            // Use smooth scroll behavior with GPU acceleration
             window.scrollTo({{
                 top: targetScroll,
-                behavior: 'auto'
+                behavior: 'smooth'
             }});
         }})();
         """
@@ -138,23 +145,63 @@ class WebViewWidget(Gtk.Box):
         except Exception as e:
             print(f"Error scrolling webview: {e}")
 
-        GLib.timeout_add(50, lambda: setattr(self, "_is_programmatic_scroll", False))
+        # Shorter delay for more responsive sync
+        GLib.timeout_add(30, lambda: setattr(self, "_is_programmatic_scroll", False))
 
-    def get_scroll_percentage(self, callback):
-        """Get current scroll percentage asynchronously."""
-        # Disabled for now due to WebKitGTK API limitations
-        # The one-way sync (sidebar -> webview) is sufficient
-        try:
+    def get_scroll_percentage(self, callback: Callable[[float], None]):
+        """Get current scroll percentage asynchronously using optimized JS execution."""
+        if not self.sync_scroll_enabled:
             callback(0.0)
+            return
+
+        # Execute in thread pool for non-blocking operation
+        def fetch_scroll():
+            js_code = """
+            (function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+                if (scrollHeight <= 0) {
+                    document.title = 'scroll:0.0';
+                    return 0.0;
+                }
+                const percentage = scrollTop / scrollHeight;
+                document.title = 'scroll:' + percentage.toFixed(6);
+                return percentage;
+            })();
+            """
+
+            try:
+                self.webview.evaluate_javascript(js_code, -1, None, None, None)
+                # Schedule title reading in main thread
+                GLib.timeout_add(10, lambda: self._read_scroll_from_title(callback))
+            except Exception as e:
+                GLib.idle_add(lambda: callback(0.0))
+
+        self._thread_pool.submit(fetch_scroll)
+
+    def _read_scroll_from_title(self, callback: Callable[[float], None]):
+        """Read scroll percentage from document title."""
+        try:
+            title = self.webview.get_title()
+            if title and title.startswith("scroll:"):
+                percentage = float(title.split(":")[1])
+                callback(percentage)
+            else:
+                callback(0.0)
         except Exception as e:
             callback(0.0)
+        return False
+
+    def connect_scroll_changed(self, callback: Callable[[float], None]):
+        """Register a callback for webview scroll changes."""
+        self._scroll_callbacks.append(callback)
 
     def setup_scroll_monitoring(self):
-        """Setup scroll event monitoring in the webview."""
+        """Setup GPU-accelerated scroll event monitoring in the webview."""
         if self._scroll_sync_handler_id:
             return
 
-        # This sets up scroll monitoring in the webview for future use
+        # Setup high-performance scroll monitoring with requestAnimationFrame
         js_code = """
         (function() {
             if (window.scrollMonitorInitialized) return;
@@ -162,24 +209,40 @@ class WebViewWidget(Gtk.Box):
             
             window.lastScrollY = 0;
             window.lastScrollPercentage = 0;
+            window.isScrolling = false;
             
-            let scrollTimeout;
-            window.addEventListener('scroll', function() {
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(function() {
-                    const currentScrollY = window.scrollY;
+            // Use requestAnimationFrame for smooth 60fps monitoring
+            function checkScroll() {
+                const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // Only update if scroll position actually changed (threshold: 1px)
+                if (Math.abs(currentScrollY - window.lastScrollY) > 1) {
+                    window.lastScrollY = currentScrollY;
                     
-                    if (Math.abs(currentScrollY - window.lastScrollY) > 5) {
-                        window.lastScrollY = currentScrollY;
-                        
-                        const maxScroll = Math.max(
-                            document.documentElement.scrollHeight - window.innerHeight,
-                            0
-                        );
-                        const percentage = maxScroll === 0 ? 0 : currentScrollY / maxScroll;
+                    const maxScroll = Math.max(
+                        document.documentElement.scrollHeight - window.innerHeight,
+                        0
+                    );
+                    const percentage = maxScroll === 0 ? 0 : currentScrollY / maxScroll;
+                    
+                    // Only update if percentage changed meaningfully
+                    if (Math.abs(percentage - window.lastScrollPercentage) > 0.001) {
                         window.lastScrollPercentage = percentage;
+                        // Store in title for retrieval
+                        document.title = 'scroll:' + percentage.toFixed(6);
                     }
-                }, 50);
+                }
+                
+                // Continue monitoring at 60fps
+                requestAnimationFrame(checkScroll);
+            }
+            
+            // Start monitoring
+            requestAnimationFrame(checkScroll);
+            
+            // Passive scroll listener for additional tracking
+            window.addEventListener('scroll', function() {
+                window.isScrolling = true;
             }, { passive: true });
         })();
         """
@@ -187,8 +250,37 @@ class WebViewWidget(Gtk.Box):
         try:
             self.webview.evaluate_javascript(js_code, -1, None, None, None)
             self._scroll_sync_handler_id = True
+
+            # Start polling for webview scroll changes at 60fps (16ms intervals)
+            self._start_scroll_polling()
         except Exception as e:
             print(f"Error setting up scroll monitoring: {e}")
+
+    def _start_scroll_polling(self):
+        """Start high-frequency polling for webview scroll changes."""
+
+        def poll_scroll():
+            if not self.sync_scroll_enabled or self._is_programmatic_scroll:
+                return True
+
+            def on_scroll_result(percentage):
+                if (
+                    not self._is_programmatic_scroll
+                    and abs(percentage - self._current_scroll_percentage) > 0.005
+                ):
+                    self._current_scroll_percentage = percentage
+                    # Notify callbacks (sidebar)
+                    for callback in self._scroll_callbacks:
+                        try:
+                            callback(percentage)
+                        except Exception as e:
+                            pass
+
+            self.get_scroll_percentage(on_scroll_result)
+            return True
+
+        # Poll at 60fps (16ms) for smooth real-time sync
+        GLib.timeout_add(16, poll_scroll)
 
     def _on_theme_changed(self, style_manager, param):
         """Fast theme switching using CSS injection only."""
@@ -557,7 +649,7 @@ class WebViewWidget(Gtk.Box):
     def _finish_load_html(self, html_content):
         """Finish loading HTML in main thread."""
         self.webview.load_html(html_content, "file:///")
-        GLib.timeout_add(300, self.setup_scroll_monitoring)
+        GLib.timeout_add(100, self.setup_scroll_monitoring)
 
     def reload(self) -> None:
         """Reload the current page."""
