@@ -83,6 +83,13 @@ template $Window: Adw.ApplicationWindow {
           icon-name: "sidebar-show-symbolic";
           tooltip-text: "Toggle Sidebar";
         }
+
+        [end]
+        Gtk.MenuButton menu_btn {
+          icon-name: "open-menu-symbolic";
+          tooltip-text: "Main Menu";
+          menu-model: main_menu;
+        }
       }
       
       content: Gtk.Box webview_container {
@@ -117,6 +124,39 @@ template $Window: Adw.ApplicationWindow {
       adw_multi_layout_view.layout-name: "mobile";
       switcher_bar.reveal: true;
       header_bar.title-widget: null;
+    }
+  }
+}
+
+menu main_menu {
+  section {
+    item {
+      label: "File Manager";
+      action: "app.file-manager";
+    }
+
+    item {
+      label: "Export...";
+      action: "app.export";
+    }
+  }
+
+  section {
+    item {
+      label: "Find";
+      action: "app.find";
+    }
+
+    item {
+      label: "Replace";
+      action: "app.replace";
+    }
+  }
+
+  section {
+    item {
+      label: "About";
+      action: "app.about";
     }
   }
 }

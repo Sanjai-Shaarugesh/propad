@@ -29,6 +29,12 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
           </object>
         </child>
         <child>
+          <object class="GtkMenuButton" id="btn_formatting">
+            <property name="icon-name">format-text-bold-symbolic</property>
+            <property name="tooltip-text">Formatting</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkButton" id="hide_webview_btn">
             <property name="icon-name">window-close-symbolic</property>
             <property name="tooltip-text">Hide Preview</property>
@@ -43,6 +49,12 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
     <child>
       <object class="GtkSeparator">
         <property name="orientation">0</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox" id="search_container">
+        <property name="name">search_container</property>
+        <property name="orientation">1</property>
       </object>
     </child>
     <child>

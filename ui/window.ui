@@ -104,6 +104,13 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
                     <property name="tooltip-text">Toggle Sidebar</property>
                   </object>
                 </child>
+                <child type="end">
+                  <object class="GtkMenuButton" id="menu_btn">
+                    <property name="icon-name">open-menu-symbolic</property>
+                    <property name="tooltip-text">Main Menu</property>
+                    <property name="menu-model">main_menu</property>
+                  </object>
+                </child>
               </object>
             </child>
             <property name="content">
@@ -143,4 +150,32 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
       </object>
     </child>
   </template>
+  <menu id="main_menu">
+    <section>
+      <item>
+        <attribute name="label">File Manager</attribute>
+        <attribute name="action">app.file-manager</attribute>
+      </item>
+      <item>
+        <attribute name="label">Export...</attribute>
+        <attribute name="action">app.export</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label">Find</attribute>
+        <attribute name="action">app.find</attribute>
+      </item>
+      <item>
+        <attribute name="label">Replace</attribute>
+        <attribute name="action">app.replace</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label">About</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
 </interface>

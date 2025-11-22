@@ -21,6 +21,11 @@ template $SidebarWidget: Gtk.Box {
       styles ["heading"]
     }
 
+    Gtk.MenuButton btn_formatting {
+      icon-name: "format-text-bold-symbolic";
+      tooltip-text: "Formatting";
+    }
+
     Gtk.Button hide_webview_btn {
       icon-name: "window-close-symbolic";
       tooltip-text: "Hide Preview";
@@ -31,6 +36,12 @@ template $SidebarWidget: Gtk.Box {
 
   Gtk.Separator {
     orientation: horizontal;
+  }
+
+  // Search bar container
+  Gtk.Box search_container {
+    name: "search_container";
+    orientation: vertical;
   }
 
   ScrolledWindow {

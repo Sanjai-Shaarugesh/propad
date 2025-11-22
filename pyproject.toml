@@ -40,7 +40,7 @@ reportAny = "none"
 reportUnusedCallResult = "none"
 reportUnknownLambdaType ="none"
 reportUnusedImport="none"
-
+reportUnboundVariable="none"
 
 [tool.ruff]
 lint.ignore = ["E402","F401"]

@@ -1,64 +1,64 @@
-# -*- coding: utf-8 -*-
-"""Python - PyGObject - GTK."""
+#!/usr/bin/env python3
 
 import gi
 import sys
 
-gi.require_version(namespace="Gtk", version="4.0")
-gi.require_version(namespace="Adw", version="1")
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gio, Gtk
+from gi.repository import Gtk, Adw, Gio
 from window import Window
 
-Adw.init()
 
+class PropadApplication(Adw.Application):
+    """Main application class."""
 
-class Application(Adw.Application):
     def __init__(self):
         super().__init__(
-            application_id="org.propad.com", flags=Gio.ApplicationFlags.DEFAULT_FLAGS
+            application_id="com.example.propad",
+            flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
         )
 
-        self.create_action("quit", self.exit_app, ["<primary>q"])
-        self.create_action("toggle-sidebar", self.toggle_sidebar, ["<primary>b"])
-
     def do_activate(self):
+        """Called when the application is activated."""
         win = self.props.active_window
-
         if not win:
             win = Window(application=self)
-
         win.present()
 
     def do_startup(self):
-        Gtk.Application.do_startup(self)
+        """Called when the application starts."""
+        Adw.Application.do_startup(self)
 
-    def do_shutdown(self):
-        Gtk.Application.do_shutdown(self)
+        # Setup keyboard shortcuts
+        self._setup_shortcuts()
 
-    def exit_app(self, action, param):
-        """Quit the application."""
-        self.quit()
+    def _setup_shortcuts(self):
+        """Setup application-wide keyboard shortcuts."""
+        # Ctrl+Q: Quit
+        quit_action = Gio.SimpleAction.new("quit", None)
+        quit_action.connect("activate", lambda *args: self.quit())
+        self.add_action(quit_action)
+        self.set_accels_for_action("app.quit", ["<Ctrl>Q"])
 
-    def toggle_sidebar(self, action, param):
-        """Toggle sidebar visibility."""
-        win = self.props.active_window
-        if win:
-            overlay = win.adw_overlay_split_view
-            overlay.set_show_sidebar(not overlay.get_show_sidebar())
+        # Ctrl+Shift+F: File Manager
+        self.set_accels_for_action("app.file-manager", ["<Ctrl><Shift>F"])
 
-    def create_action(self, name, callback, shortcuts=None):
-        """Create an application action."""
-        action = Gio.SimpleAction.new(name=name, parameter_type=None)
-        action.connect("activate", callback)
-        self.add_action(action=action)
-        if shortcuts:
-            self.set_accels_for_action(
-                detailed_action_name=f"app.{name}",
-                accels=shortcuts,
-            )
+        # Ctrl+Shift+E: Export
+        self.set_accels_for_action("app.export", ["<Ctrl><Shift>E"])
+
+        # Ctrl+F: Find
+        self.set_accels_for_action("app.find", ["<Ctrl>F"])
+
+        # Ctrl+H: Replace
+        self.set_accels_for_action("app.replace", ["<Ctrl>H"])
+
+
+def main():
+    """Main entry point."""
+    app = PropadApplication()
+    return app.run(sys.argv)
 
 
 if __name__ == "__main__":
-    app = Application()
-    app.run(sys.argv)
+    sys.exit(main())

@@ -1,0 +1,195 @@
+using Gtk 4.0;
+
+template $FormattingToolbar: Gtk.Popover {
+  Gtk.Box {
+    orientation: vertical;
+    spacing: 8;
+    margin-start: 12;
+    margin-end: 12;
+    margin-top: 12;
+    margin-bottom: 12;
+
+    Gtk.Label {
+      label: "Text Formatting";
+      styles ["heading"]
+      halign: start;
+    }
+
+    Gtk.Box {
+      orientation: horizontal;
+      spacing: 4;
+      homogeneous: true;
+
+      Gtk.Button btn_bold {
+        icon-name: "format-text-bold-symbolic";
+        tooltip-text: "Bold (Ctrl+B)";
+      }
+
+      Gtk.Button btn_italic {
+        icon-name: "format-text-italic-symbolic";
+        tooltip-text: "Italic (Ctrl+I)";
+      }
+
+      Gtk.Button btn_strikethrough {
+        icon-name: "format-text-strikethrough-symbolic";
+        tooltip-text: "Strikethrough";
+      }
+
+      Gtk.Button btn_code {
+        icon-name: "text-x-generic-symbolic";
+        tooltip-text: "Inline Code";
+      }
+    }
+
+    Gtk.Separator {}
+
+    Gtk.Label {
+      label: "Headings";
+      styles ["heading"]
+      halign: start;
+    }
+
+    Gtk.Box {
+      orientation: horizontal;
+      spacing: 4;
+      homogeneous: true;
+
+      Gtk.Button btn_h1 {
+        label: "H1";
+        tooltip-text: "Heading 1";
+      }
+
+      Gtk.Button btn_h2 {
+        label: "H2";
+        tooltip-text: "Heading 2";
+      }
+
+      Gtk.Button btn_h3 {
+        label: "H3";
+        tooltip-text: "Heading 3";
+      }
+
+      Gtk.Button btn_h4 {
+        label: "H4";
+        tooltip-text: "Heading 4";
+      }
+    }
+
+    Gtk.Separator {}
+
+    Gtk.Label {
+      label: "Lists & Blocks";
+      styles ["heading"]
+      halign: start;
+    }
+
+    Gtk.Box {
+      orientation: horizontal;
+      spacing: 4;
+      homogeneous: true;
+
+      Gtk.Button btn_bullet_list {
+        icon-name: "view-list-symbolic";
+        tooltip-text: "Bullet List";
+      }
+
+      Gtk.Button btn_numbered_list {
+        icon-name: "view-list-ordered-symbolic";
+        tooltip-text: "Numbered List";
+      }
+
+      Gtk.Button btn_quote {
+        icon-name: "format-indent-more-symbolic";
+        tooltip-text: "Block Quote";
+      }
+
+      Gtk.Button btn_code_block {
+        icon-name: "utilities-terminal-symbolic";
+        tooltip-text: "Code Block";
+      }
+    }
+
+    Gtk.Separator {}
+
+    Gtk.Label {
+      label: "Insert";
+      styles ["heading"]
+      halign: start;
+    }
+
+    Gtk.Box {
+      orientation: vertical;
+      spacing: 4;
+
+      Gtk.Button btn_link {
+        Gtk.Box {
+          spacing: 8;
+          Gtk.Image {
+            icon-name: "insert-link-symbolic";
+          }
+          Gtk.Label {
+            label: "Link";
+            hexpand: true;
+            halign: start;
+          }
+        }
+      }
+
+      Gtk.Button btn_image {
+        Gtk.Box {
+          spacing: 8;
+          Gtk.Image {
+            icon-name: "insert-image-symbolic";
+          }
+          Gtk.Label {
+            label: "Image";
+            hexpand: true;
+            halign: start;
+          }
+        }
+      }
+
+      Gtk.Button btn_table {
+        Gtk.Box {
+          spacing: 8;
+          Gtk.Image {
+            icon-name: "view-grid-symbolic";
+          }
+          Gtk.Label {
+            label: "Table";
+            hexpand: true;
+            halign: start;
+          }
+        }
+      }
+
+      Gtk.Button btn_mermaid {
+        Gtk.Box {
+          spacing: 8;
+          Gtk.Image {
+            icon-name: "network-wired-symbolic";
+          }
+          Gtk.Label {
+            label: "Mermaid Diagram";
+            hexpand: true;
+            halign: start;
+          }
+        }
+      }
+
+      Gtk.Button btn_latex {
+        Gtk.Box {
+          spacing: 8;
+          Gtk.Image {
+            icon-name: "x-office-document-symbolic";
+          }
+          Gtk.Label {
+            label: "LaTeX Math";
+            hexpand: true;
+            halign: start;
+          }
+        }
+      }
+    }
+  }
+}
