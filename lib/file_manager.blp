@@ -1,0 +1,89 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $FileManagerDialog: Adw.Window {
+  title: "File Manager";
+  default-width: 700;
+  default-height: 500;
+  modal: true;
+
+  content: Gtk.Box {
+    orientation: vertical;
+
+    Adw.HeaderBar {
+      styles ["flat"]
+      [start]
+      Gtk.Button btn_new {
+        icon-name: "document-new-symbolic";
+        tooltip-text: "New File";
+      }
+
+      [start]
+      Gtk.Button btn_open {
+        icon-name: "document-open-symbolic";
+        tooltip-text: "Open File";
+      }
+
+      [start]
+      Gtk.Button btn_save {
+        icon-name: "document-save-symbolic";
+        tooltip-text: "Save";
+      }
+
+      [start]
+      Gtk.Button btn_save_as {
+        icon-name: "document-save-as-symbolic";
+        tooltip-text: "Save As";
+      }
+
+      [end]
+      Gtk.Button btn_close {
+        icon-name: "view-conceal-symbolic";
+        tooltip-text: "Close";
+      }
+    }
+
+    Gtk.Box {
+      orientation: vertical;
+      vexpand: true;
+      margin-start: 12;
+      margin-end: 12;
+      margin-top: 12;
+      margin-bottom: 12;
+      spacing: 12;
+
+      Gtk.Label {
+        label: "Current File:";
+        halign: start;
+        styles ["heading"]
+      }
+
+      Gtk.Entry entry_current_file {
+        placeholder-text: "No file loaded";
+        editable: false;
+        hexpand: true;
+      }
+
+      Gtk.Separator {
+        orientation: horizontal;
+      }
+
+      Gtk.Label {
+        label: "Recent Files:";
+        halign: start;
+        styles ["heading"]
+      }
+
+      Gtk.ScrolledWindow {
+        vexpand: true;
+        hscrollbar-policy: never;
+        vscrollbar-policy: automatic;
+
+        Gtk.ListBox listbox_recent {
+          selection-mode: single;
+          styles ["boxed-list"]
+        }
+      }
+    }
+  };
+}
