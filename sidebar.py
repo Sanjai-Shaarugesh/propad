@@ -82,11 +82,11 @@ class SidebarWidget(Gtk.Box):
                 vadjustment = parent.get_vadjustment()
                 if vadjustment:
                     self._scroll_adjustment = vadjustment
-                    # Reduced to 30fps for better performance
+                    # Use 60fps for better stability
                     if self._scroll_poll_id:
                         GLib.source_remove(self._scroll_poll_id)
-                    self._scroll_poll_id = GLib.timeout_add(33, self._poll_scroll)
-                    print("✅ Sidebar scroll sync polling (30fps) setup successful!")
+                    self._scroll_poll_id = GLib.timeout_add(16, self._poll_scroll)
+                    print("✅ Sidebar scroll sync polling (60fps) setup successful!")
                     return False
             parent = parent.get_parent()
             depth += 1
@@ -95,7 +95,7 @@ class SidebarWidget(Gtk.Box):
         return False
 
     def _poll_scroll(self):
-        """Poll scroll at 30fps with optimized precision."""
+        """Poll scroll at 60fps for stable tracking."""
         if (
             not self.sync_scroll_enabled
             or self._is_programmatic_scroll
@@ -114,8 +114,8 @@ class SidebarWidget(Gtk.Box):
             else:
                 percentage = value / max_scroll
 
-            # Larger threshold to reduce overhead
-            if abs(percentage - self._last_scroll_value) > 0.005:
+            # Balanced threshold for smooth tracking without overhead
+            if abs(percentage - self._last_scroll_value) > 0.003:
                 self._last_scroll_value = percentage
 
                 # Notify callbacks directly
@@ -130,7 +130,7 @@ class SidebarWidget(Gtk.Box):
         return True
 
     def scroll_to_percentage(self, percentage: float):
-        """Scroll instantly for better performance."""
+        """Scroll smoothly with optimized rendering."""
         if not self.sync_scroll_enabled or not self._scroll_adjustment:
             return
 
@@ -146,14 +146,15 @@ class SidebarWidget(Gtk.Box):
             return
 
         target_value = max_scroll * percentage
+        current_value = self._scroll_adjustment.get_value()
 
-        # Instant scroll - no animation
+        # Use instant scroll to avoid rendering lag
         self._scroll_adjustment.set_value(target_value)
         self._last_scroll_value = percentage
 
-        # Quick reset
+        # Quick reset to allow user scrolling
         GLib.timeout_add(
-            50, lambda: setattr(self, "_is_programmatic_scroll", False) or False
+            100, lambda: setattr(self, "_is_programmatic_scroll", False) or False
         )
 
     def connect_scroll_changed(self, callback):

@@ -114,24 +114,58 @@ class WebViewWidget(Gtk.Box):
         self.sync_scroll_enabled = enabled
 
     def scroll_to_percentage(self, percentage: float):
-        """Scroll webview instantly without animation to prevent lag."""
+        """Scroll webview with smooth 60fps animation."""
         if not self.sync_scroll_enabled or self._is_programmatic_scroll:
             return
 
         self._is_programmatic_scroll = True
         self._target_scroll_percentage = max(0.0, min(1.0, percentage))
 
-        # Instant scroll - no animation for better performance
+        # Smooth scroll with requestAnimationFrame
         js_code = f"""
         (function() {{
+            const targetPercentage = {self._target_scroll_percentage};
             const maxScroll = Math.max(
                 document.documentElement.scrollHeight - window.innerHeight,
                 0
             );
-            const targetScroll = maxScroll * {self._target_scroll_percentage};
+            const targetScroll = maxScroll * targetPercentage;
+            const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+            const distance = targetScroll - currentScroll;
             
-            // Instant scroll without animation
-            window.scrollTo(0, targetScroll);
+            // Cancel any existing animation
+            if (window.scrollAnimation) {{
+                cancelAnimationFrame(window.scrollAnimation);
+            }}
+            
+            // For small movements, jump instantly
+            if (Math.abs(distance) < 5) {{
+                window.scrollTo(0, targetScroll);
+                return;
+            }}
+            
+            // Smooth animation at 60fps
+            const startTime = performance.now();
+            const duration = 100; // 100ms for quick response
+            
+            function animate(currentTime) {{
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Ease-out quad for smooth feel
+                const eased = 1 - (1 - progress) * (1 - progress);
+                const current = currentScroll + (distance * eased);
+                
+                window.scrollTo(0, current);
+                
+                if (progress < 1) {{
+                    window.scrollAnimation = requestAnimationFrame(animate);
+                }} else {{
+                    window.scrollAnimation = null;
+                }}
+            }}
+            
+            window.scrollAnimation = requestAnimationFrame(animate);
         }})();
         """
 
@@ -140,9 +174,9 @@ class WebViewWidget(Gtk.Box):
         except Exception as e:
             print(f"Error scrolling webview: {e}")
 
-        # Quick flag reset
+        # Reset flag after animation
         GLib.timeout_add(
-            50, lambda: setattr(self, "_is_programmatic_scroll", False) or False
+            150, lambda: setattr(self, "_is_programmatic_scroll", False) or False
         )
 
     def get_scroll_percentage(self, callback: Callable[[float], None]):
@@ -189,7 +223,7 @@ class WebViewWidget(Gtk.Box):
         self._scroll_callbacks.append(callback)
 
     def setup_scroll_monitoring(self):
-        """Setup optimized scroll monitoring (60fps)."""
+        """Setup optimized scroll monitoring."""
         if self._scroll_sync_handler_id:
             return
 
@@ -198,36 +232,36 @@ class WebViewWidget(Gtk.Box):
             if (window.scrollMonitorInitialized) return;
             window.scrollMonitorInitialized = true;
             
-            window.lastScrollY = 0;
             window.lastScrollPercentage = 0;
+            let lastUpdate = 0;
+            const throttleMs = 16; // 60fps throttle
             
-            // Optimized monitoring with requestAnimationFrame
             function checkScroll() {
-                const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
-                
-                // Update on meaningful movement
-                if (Math.abs(currentScrollY - window.lastScrollY) > 1) {
-                    window.lastScrollY = currentScrollY;
-                    
-                    const maxScroll = Math.max(
-                        document.documentElement.scrollHeight - window.innerHeight,
-                        0
-                    );
-                    const percentage = maxScroll === 0 ? 0 : currentScrollY / maxScroll;
-                    
-                    // Update if changed meaningfully
-                    if (Math.abs(percentage - window.lastScrollPercentage) > 0.002) {
-                        window.lastScrollPercentage = percentage;
-                        document.title = 'scroll:' + percentage.toFixed(6);
-                    }
+                const now = Date.now();
+                if (now - lastUpdate < throttleMs) {
+                    return;
                 }
+                lastUpdate = now;
                 
-                requestAnimationFrame(checkScroll);
+                const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+                const maxScroll = Math.max(
+                    document.documentElement.scrollHeight - window.innerHeight,
+                    0
+                );
+                const percentage = maxScroll === 0 ? 0 : currentScrollY / maxScroll;
+                
+                // Update on meaningful change
+                if (Math.abs(percentage - window.lastScrollPercentage) > 0.003) {
+                    window.lastScrollPercentage = percentage;
+                    document.title = 'scroll:' + percentage.toFixed(6);
+                }
             }
             
-            requestAnimationFrame(checkScroll);
+            // Use scroll event with throttling
+            window.addEventListener('scroll', checkScroll, { passive: true });
             
-            window.addEventListener('scroll', function() {}, { passive: true });
+            // Also poll at 60fps for continuous tracking
+            setInterval(checkScroll, 16);
         })();
         """
 
@@ -239,7 +273,7 @@ class WebViewWidget(Gtk.Box):
             print(f"Error setting up scroll monitoring: {e}")
 
     def _start_scroll_polling(self):
-        """Start 60fps polling."""
+        """Start optimized polling at 60fps."""
 
         def poll_scroll():
             if not self.sync_scroll_enabled or self._is_programmatic_scroll:
@@ -248,7 +282,7 @@ class WebViewWidget(Gtk.Box):
             def on_scroll_result(percentage):
                 if (
                     not self._is_programmatic_scroll
-                    and abs(percentage - self._current_scroll_percentage) > 0.002
+                    and abs(percentage - self._current_scroll_percentage) > 0.003
                 ):
                     self._current_scroll_percentage = percentage
                     for callback in self._scroll_callbacks:
