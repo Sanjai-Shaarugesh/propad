@@ -145,8 +145,10 @@ class WebViewWidget(Gtk.Box):
         except Exception as e:
             print(f"Error scrolling webview: {e}")
 
-        # Shorter delay for more responsive sync
-        GLib.timeout_add(30, lambda: setattr(self, "_is_programmatic_scroll", False))
+        # Reset programmatic flag after one 60fps tick (16ms)
+        GLib.timeout_add(
+            16, lambda: setattr(self, "_is_programmatic_scroll", False) or False
+        )
 
     def get_scroll_percentage(self, callback: Callable[[float], None]):
         """Get current scroll percentage asynchronously using optimized JS execution."""
@@ -172,8 +174,8 @@ class WebViewWidget(Gtk.Box):
 
             try:
                 self.webview.evaluate_javascript(js_code, -1, None, None, None)
-                # Schedule title reading in main thread
-                GLib.timeout_add(10, lambda: self._read_scroll_from_title(callback))
+                # Schedule title reading in main thread on next 60fps tick
+                GLib.timeout_add(16, lambda: self._read_scroll_from_title(callback))
             except Exception as e:
                 GLib.idle_add(lambda: callback(0.0))
 
@@ -188,7 +190,7 @@ class WebViewWidget(Gtk.Box):
                 callback(percentage)
             else:
                 callback(0.0)
-        except Exception as e:
+        except Exception:
             callback(0.0)
         return False
 
@@ -251,7 +253,7 @@ class WebViewWidget(Gtk.Box):
             self.webview.evaluate_javascript(js_code, -1, None, None, None)
             self._scroll_sync_handler_id = True
 
-            # Start polling for webview scroll changes at 60fps (16ms intervals)
+            # Start polling for webview scroll changes at ~60fps (16ms)
             self._start_scroll_polling()
         except Exception as e:
             print(f"Error setting up scroll monitoring: {e}")
@@ -266,21 +268,23 @@ class WebViewWidget(Gtk.Box):
             def on_scroll_result(percentage):
                 if (
                     not self._is_programmatic_scroll
-                    and abs(percentage - self._current_scroll_percentage) > 0.005
+                    and abs(percentage - self._current_scroll_percentage) > 0.001
                 ):
                     self._current_scroll_percentage = percentage
                     # Notify callbacks (sidebar)
                     for callback in self._scroll_callbacks:
                         try:
                             callback(percentage)
-                        except Exception as e:
+                        except Exception:
                             pass
 
             self.get_scroll_percentage(on_scroll_result)
             return True
 
-        # Poll at 60fps (16ms) for smooth real-time sync
+        # Poll at ~60fps (16ms) for smooth real-time sync
         GLib.timeout_add(16, poll_scroll)
+
+    # ... rest of class unchanged (theme, rendering, load_html, etc.)
 
     def _on_theme_changed(self, style_manager, param):
         """Fast theme switching using CSS injection only."""

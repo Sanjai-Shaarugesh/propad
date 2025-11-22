@@ -162,7 +162,7 @@ Start editing to see the preview!"""
         self._last_webview_percentage = 0.0
         self._scroll_lock = False
 
-        print("🚀 Setting up bidirectional scroll sync with GPU acceleration...")
+        print("🚀Setting up bidirectional scroll sync with GPU acceleration...")
 
         # DIRECTION 1: Sidebar -> WebView (Editor scrolls, Preview follows)
         def on_sidebar_scroll(percentage):
