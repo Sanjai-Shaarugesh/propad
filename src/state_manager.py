@@ -3,8 +3,10 @@ import json
 import os
 
 gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
 
-from gi.repository import Gtk
+from gi.repository import Adw, Gdk , Gtk
+
 
 CONFIG_DIR = os.path.expanduser("~/.config/propad")
 STATE_FILE = os.path.join(CONFIG_DIR, "state.json")
@@ -15,6 +17,44 @@ class StateManager:
 
     def __init__(self):
         self.state = self.load_state()
+        
+        # Listen to system theme changes
+        self.style_manager = Adw.StyleManager.get_default()
+        self.style_manager.connect("notify::dark", self._on_theme_changed)
+        
+        # Apply initial theme
+        self._apply_theme(self.is_dark_mode())
+        
+    def is_dark_mode(self) -> bool:
+        """Check if system is in dark mode."""
+        return self.style_manager.get_dark()
+    
+    def _apply_theme(self, dark: bool):
+        """Apply dark/light theme to the textview."""
+        css_provider = Gtk.CssProvider()
+        if dark:
+            css = """
+            textview {
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+            }
+            """
+        else:
+            css = """
+            textview {
+                background-color: #ffffff;
+                color: #1e1e1e;
+            }
+            """
+        css_provider.load_from_data(css.encode())
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER
+        )
+    
+    def _on_theme_changed(self, style_manager, param):
+        """Automatically update theme when system changes."""
+        self._apply_theme(style_manager.get_dark())
+
 
     def load_state(self):
         """Load application state from file."""

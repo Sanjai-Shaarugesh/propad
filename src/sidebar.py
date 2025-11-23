@@ -224,6 +224,15 @@ class SidebarWidget(Gtk.Box):
     def connect_text_changed(self, callback):
         """Register a callback for text changes."""
         self._text_changed_callbacks.append(callback)
+        
+    def _on_buffer_changed(self, buffer):
+            """Call all registered callbacks when text changes."""
+            for callback in self._text_changed_callbacks:
+                callback(self.get_text())
+    
+    def connect_text_changed(self, callback):
+            """Register a callback for text changes."""
+            self._text_changed_callbacks.append(callback)
 
     def connect_hide_webview(self, callback):
         """Register a callback for hide webview button."""

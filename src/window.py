@@ -45,6 +45,9 @@ class Window(Adw.ApplicationWindow):
         self.content_modified = False
         self.current_file = None
         self.sync_scroll_enabled = True
+        
+        self.style_manager = Adw.StyleManager.get_default()
+        self.style_manager.connect("notify::dark", self._on_theme_changed)
 
         # Thread pool for parallel operations
         self._thread_pool = ThreadPoolExecutor(max_workers=6)
@@ -154,6 +157,20 @@ Start editing to see the preview!"""
 
         # Auto-save timer (every 30 seconds)
         GLib.timeout_add_seconds(30, self._auto_save_state)
+        
+        
+    def _on_theme_changed(self, style_manager, param):
+        """Automatically update UI when theme changes."""
+        # Update webview
+        current_text = self.sidebar_widget.get_text()
+        html = comrak.render_markdown(
+            current_text, extension_options=comrak.ExtensionOptions()
+        )
+        self.webview_widget.load_html(html, is_dark=self.is_dark_mode())
+    
+        # Update sidebar theme (optional, if you want textview colors to change)
+        self.sidebar_widget._apply_theme(self.is_dark_mode())
+
 
     def _setup_bidirectional_scroll_sync(self):
         """Setup lightweight bidirectional scroll synchronization."""
@@ -610,7 +627,7 @@ Start editing to see the preview!"""
         """Restore application state."""
         window_state = self.state_manager.get_window_state()
         self.set_default_size(
-            window_state.get("width", 950), window_state.get("height", 750)
+            window_state.get("width", 950), window_state.get("height", 7)
         )
 
         if window_state.get("maximized", False):

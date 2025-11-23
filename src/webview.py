@@ -302,7 +302,10 @@ class WebViewWidget(Gtk.Box):
         is_dark = style_manager.get_dark()
         if is_dark != self._last_is_dark:
             self._last_is_dark = is_dark
-            self._apply_theme_instantly(is_dark)
+            if self._last_html:
+                # Reload with the same HTML to update colors
+                self.load_html(self._last_html, is_dark=is_dark)
+
 
     def _apply_theme_instantly(self, is_dark):
         """Apply theme instantly using CSS injection."""
@@ -488,8 +491,12 @@ class WebViewWidget(Gtk.Box):
         return result
 
     def set_theme(self, is_dark: bool):
-        """Set theme."""
+        """Manually set the theme and update the webview immediately."""
         self._last_is_dark = is_dark
+        if self._last_html:
+            # Reload the last HTML with new theme
+            self.load_html(self._last_html, is_dark=is_dark)
+
 
     def _load_external_file(self, filename: str) -> str:
         """Load content from external file."""
