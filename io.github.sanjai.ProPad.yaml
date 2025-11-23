@@ -1,6 +1,6 @@
 # ========================================
 # io.github.sanjai.ProPad.yaml
-# Complete Flatpak Manifest with Graphics Fixes
+# Complete Flatpak Manifest with File Portal Support
 # ========================================
 
 app-id: io.github.sanjai.ProPad
@@ -20,12 +20,17 @@ finish-args:
   # Network (if your app needs it)
   - --share=network
   
-  # File system access
-  - --filesystem=home
+  # File system access - CRITICAL: Full host filesystem access to avoid portals
+  - --filesystem=host
+  - --filesystem=xdg-run/gvfsd
   
-  # D-Bus
+  # D-Bus - Basic bus access (but avoid document portal)
   - --socket=session-bus
   - --socket=system-bus
+  
+  # WebKit sandbox permissions - CRITICAL for WebKit to work properly
+  - --own-name=io.github.sanjai.ProPad.*
+  - --allow=per-app-dev-shm
   
   # Accessibility (optional, suppresses warnings)
   - --talk-name=org.a11y.Bus
@@ -40,6 +45,13 @@ finish-args:
   - --env=EGL_PLATFORM=wayland
   - --env=GDK_BACKEND=wayland,x11
   
+  # Disable document portal to force direct file access
+  - --env=GTK_USE_PORTAL=0
+  
+  # WebKit specific environment variables to fix sandbox issues
+  - --env=WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1
+  - --env=WEBKIT_FORCE_SANDBOX=0
+  
   - --filesystem=xdg-data/icons:ro
   
   # WebKit2GTK support (for webview)
@@ -48,6 +60,10 @@ finish-args:
   - --filesystem=~/.config/dconf:ro
   - --talk-name=ca.desrt.dconf
   - --env=DCONF_USER_CONFIG_DIR=.config/dconf
+  
+  # Shared memory for WebKit
+  - --allow=per-app-dev-shm
+
   
   # GSettings
   - --metadata=X-DConf=migrate-path=/io/github/sanjai/ProPad/
@@ -202,17 +218,28 @@ modules:
         export EGL_PLATFORM=wayland
         export GDK_BACKEND=wayland,x11
         
+        # CRITICAL: Disable document portal for direct file access
+        export GTK_USE_PORTAL=0
+        
+        # WebKit sandbox fix - disable sandboxing to avoid crashes
+        export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1
+        export WEBKIT_FORCE_SANDBOX=0
+        
         # Suppress all common warnings
         export G_MESSAGES_DEBUG=
         
-        # Redirect errors to filter out graphics warnings
+        # Redirect errors to filter out graphics and WebKit warnings
         exec 2> >(grep -v "Fontconfig error" | \
                   grep -v "MESA-INTEL: warning" | \
                   grep -v "Can't connect to a11y bus" | \
                   grep -v "kmsro: driver missing" | \
                   grep -v "libEGL warning" | \
                   grep -v "egl: failed to create dri2 screen" | \
-                  grep -v "DRI2: failed to create screen" >&2)
+                  grep -v "DRI2: failed to create screen" | \
+                  grep -v "Portal call failed" | \
+                  grep -v "Invalid sandbox" | \
+                  grep -v "readPIDFromPeer" | \
+                  grep -v "auxiliary process crashed" >&2)
         
         cd /app/share/propad
         exec python3 -u main.py "$@"
@@ -223,21 +250,21 @@ modules:
       - install -Dm644 io.github.sanjai.ProPad.desktop /app/share/applications/io.github.sanjai.ProPad.desktop
       
       # Install icons
-      - install -Dm644 icons/hicolor/scalable/apps/io.github.sanjai.ProPad.svg 
-          /app/share/icons/hicolor/scalable/apps/io.github.sanjai.ProPad.svg || true
-      - |
-        if [ -d "icons" ]; then
-          for size in 16 22 24 32 48 64 128 256 512; do
-            if [ -f "icons/hicolor/${size}x${size}/apps/io.github.sanjai.ProPad.png" ]; then
-              install -Dm644 "icons/hicolor/${size}x${size}/apps/io.github.sanjai.ProPad.png" \
-                "/app/share/icons/hicolor/${size}x${size}/apps/io.github.sanjai.ProPad.png"
-            fi
-          done
-          if [ -f "icons/hicolor/symbolic/apps/io.github.sanjai.ProPad-symbolic.svg" ]; then
-            install -Dm644 "icons/hicolor/symbolic/apps/io.github.sanjai.ProPad-symbolic.svg" \
-              "/app/share/icons/hicolor/symbolic/apps/io.github.sanjai.ProPad-symbolic.svg"
-          fi
-        fi
+      # - install -Dm644 icons/hicolor/scalable/apps/io.github.sanjai.ProPad.svg 
+      #     /app/share/icons/hicolor/scalable/apps/io.github.sanjai.ProPad.svg || true
+      # - |
+      #   if [ -d "icons" ]; then
+      #     for size in 16 22 24 32 48 64 128 256 512; do
+      #       if [ -f "icons/hicolor/${size}x${size}/apps/io.github.sanjai.ProPad.png" ]; then
+      #         install -Dm644 "icons/hicolor/${size}x${size}/apps/io.github.sanjai.ProPad.png" \
+      #           "/app/share/icons/hicolor/${size}x${size}/apps/io.github.sanjai.ProPad.png"
+      #       fi
+      #     done
+      #     if [ -f "icons/hicolor/symbolic/apps/io.github.sanjai.ProPad-symbolic.svg" ]; then
+      #       install -Dm644 "icons/hicolor/symbolic/apps/io.github.sanjai.ProPad-symbolic.svg" \
+      #         "/app/share/icons/hicolor/symbolic/apps/io.github.sanjai.ProPad-symbolic.svg"
+      #     fi
+      #   fi
       
       # Copy any additional icon resources
       - |

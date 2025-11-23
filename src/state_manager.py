@@ -26,7 +26,7 @@ class StateManager:
             print(f"Error loading state: {e}")
 
         return {
-            "window": {"width": 853, "height": 634, "maximized": False},
+            "window": {"width": 950, "height": 750, "maximized": False},
             "current_file": None,
             "content": "",
             "cursor_position": 0,
@@ -127,7 +127,7 @@ class StateManager:
         # Window size
         window_state = self.get_window_state()
         window.set_default_size(
-            window_state.get("width", 853), window_state.get("height", 634)
+            window_state.get("width", 850), window_state.get("height", 750)
         )
 
         if window_state.get("maximized", False):

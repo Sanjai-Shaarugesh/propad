@@ -610,7 +610,7 @@ Start editing to see the preview!"""
         """Restore application state."""
         window_state = self.state_manager.get_window_state()
         self.set_default_size(
-            window_state.get("width", 853), window_state.get("height", 634)
+            window_state.get("width", 950), window_state.get("height", 750)
         )
 
         if window_state.get("maximized", False):
