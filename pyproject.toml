@@ -5,12 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "comrak>=0.0.9",
-    "html2pdf4doc>=0.0.22",
     "markdown>=3.10",
     "pygobject>=3.54.5",
     "pygobject-stubs>=2.14.0",
-    "weasyprint>=66.0",
 ]
 
 
@@ -41,11 +38,10 @@ reportImplicitOverride = "none"
 reportAny = "none"
 reportUnusedCallResult = "none"
 reportUnknownLambdaType ="none"
-reportUnusedImport="none"
-reportUnboundVariable="none"
+
 
 [tool.ruff]
-lint.ignore = ["E402","F401"]
+lint.ignore = ["E402"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["gi"]
