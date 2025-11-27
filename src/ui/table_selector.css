@@ -1,0 +1,50 @@
+/* ===============================================
+   TABLE SELECTOR CSS
+   Clean design with light green theme
+   Fixed for GTK4 compatibility
+   =============================================== */
+
+/* Title label */
+.title-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(180, 255, 200, 0.95);
+    margin-bottom: 4px;
+}
+
+/* Grid frame with rounded corners */
+.grid-frame {
+    border-radius: 10px;
+    background: rgba(40, 45, 50, 0.5);
+    border: 1px solid rgba(150, 255, 180, 0.3);
+}
+
+/* Grid styling */
+.table-grid {
+    border-radius: 10px;
+    background: transparent;
+}
+
+/* Individual cell styling */
+.grid-cell {
+    background: transparent;
+}
+
+/* Dimension values (Rows and Cols labels) */
+.dim-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(200, 255, 220, 1);
+    padding: 4px 10px;
+    background: rgba(100, 200, 120, 0.25);
+    border-radius: 8px;
+    border: 1px solid rgba(120, 220, 140, 0.35);
+}
+
+/* Separator between rows and columns */
+.dim-separator {
+    font-size: 15px;
+    font-weight: 700;
+    color: rgba(150, 255, 180, 0.9);
+}
+
