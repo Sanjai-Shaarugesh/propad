@@ -384,19 +384,69 @@ class WebViewWidget(Gtk.Box):
             nav_action = decision.get_navigation_action()
             request = nav_action.get_request()
             uri = request.get_uri()
-
+    
+            # Allow file:// URIs (local content) - but check if it's actually a web URL
             if uri and uri.startswith("file://"):
+                # Extract the path part after file://
+                path_part = uri[7:]  # Remove "file://"
+                
+                # Check if this looks like a web URL that was incorrectly prefixed with file://
+                if self._is_web_url(path_part):
+                    # It's actually a web URL, open in external browser
+                    full_uri = f"https://{path_part.lstrip('/')}"
+                    Gtk.show_uri(None, full_uri, 0)
+                    decision.ignore()
+                    return True
+                
+                # It's a legitimate local file
                 decision.use()
                 return False
-
+    
+            # Handle external URLs with protocol
             if uri and (uri.startswith("http://") or uri.startswith("https://")):
                 Gtk.show_uri(None, uri, 0)
                 decision.ignore()
                 return True
-
+            
+            # Handle web URLs without protocol
+            if uri and self._is_web_url(uri):
+                full_uri = f"https://{uri}"
+                Gtk.show_uri(None, full_uri, 0)
+                decision.ignore()
+                return True
+    
             decision.use()
             return False
         return False
+    
+    def _is_web_url(self, uri: str) -> bool:
+        """Check if a URI looks like a web URL without protocol."""
+        if not uri:
+            return False
+        
+        # Remove any leading/trailing whitespace and slashes
+        uri = uri.strip().lstrip('/')
+        
+        # Ignore if it looks like a local path
+        if uri.startswith('/') or uri.startswith('./') or uri.startswith('../'):
+            return False
+        
+        # Check for common web patterns
+        if uri.startswith("www."):
+            return True
+        
+        # Check if it contains common TLDs
+        common_tlds = [".com", ".org", ".net", ".edu", ".gov", ".io", ".co", ".uk", 
+                       ".de", ".fr", ".jp", ".cn", ".in", ".br", ".au", ".ca"]
+        has_tld = any(tld in uri.lower() for tld in common_tlds)
+        
+        # Must have a dot, not be at start/end, and no spaces
+        has_valid_structure = ("." in uri and 
+                              not uri.startswith(".") and 
+                              not uri.endswith(".") and 
+                              " " not in uri)
+        
+        return has_tld and has_valid_structure
 
     def _on_context_menu(self, webview, context_menu, hit_test_result):
         """Handle context menu."""
