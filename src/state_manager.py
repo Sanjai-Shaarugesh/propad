@@ -5,7 +5,7 @@ import os
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gdk , Gtk
+from gi.repository import Adw, Gdk, Gtk
 
 
 CONFIG_DIR = os.path.expanduser("~/.config/propad")
@@ -72,6 +72,10 @@ class StateManager:
             "cursor_position": 0,
             "sidebar_visible": True,
             "webview_hidden": False,
+            "scroll_positions": {
+                "sidebar": 0.0,
+                "webview": 0.0
+            }
         }
 
     def save_state(self):
@@ -139,6 +143,18 @@ class StateManager:
     def save_webview_hidden(self, hidden):
         """Save webview hidden state."""
         self.state["webview_hidden"] = hidden
+        self.save_state()
+
+    def get_scroll_positions(self):
+        """Get saved scroll positions."""
+        return self.state.get("scroll_positions", {"sidebar": 0.0, "webview": 0.0})
+
+    def save_scroll_positions(self, sidebar_percentage, webview_percentage):
+        """Save scroll positions."""
+        if "scroll_positions" not in self.state:
+            self.state["scroll_positions"] = {}
+        self.state["scroll_positions"]["sidebar"] = sidebar_percentage
+        self.state["scroll_positions"]["webview"] = webview_percentage
         self.save_state()
 
     def save_all(self, window, sidebar, webview_hidden):

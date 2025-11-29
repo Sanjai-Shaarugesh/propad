@@ -186,32 +186,42 @@ class SidebarWidget(Gtk.Box):
             callback(0.0)
 
     def scroll_to_percentage(self, percentage: float):
-        """Scroll smoothly with optimized rendering."""
-        if not self.sync_scroll_enabled or not self._scroll_adjustment:
+        """Enhanced scroll with better restoration support."""
+        if not self._scroll_adjustment:
+            print("⚠️ Scroll adjustment not ready yet")
             return
-
+    
+        # Temporarily disable sync to prevent feedback loops during restoration
+        was_syncing = self.sync_scroll_enabled
+        self.sync_scroll_enabled = False
         self._is_programmatic_scroll = True
+        
         self._target_scroll_value = max(0.0, min(1.0, percentage))
-
+    
         upper = self._scroll_adjustment.get_upper()
         page_size = self._scroll_adjustment.get_page_size()
         max_scroll = upper - page_size
-
+    
         if max_scroll <= 0:
             self._is_programmatic_scroll = False
+            self.sync_scroll_enabled = was_syncing
             return
-
+    
         target_value = max_scroll * percentage
-        current_value = self._scroll_adjustment.get_value()
-
-        # Use instant scroll to avoid rendering lag
+        
+        print(f"📜 Sidebar scrolling to {percentage:.3f} (value: {target_value:.1f}/{max_scroll:.1f})")
+        
+        # Use instant scroll for restoration
         self._scroll_adjustment.set_value(target_value)
         self._last_scroll_value = percentage
-
-        # Quick reset to allow user scrolling
-        GLib.timeout_add(
-            100, lambda: setattr(self, "_is_programmatic_scroll", False) or False
-        )
+    
+        # Re-enable sync after scroll completes
+        def reset_flags():
+            self._is_programmatic_scroll = False
+            self.sync_scroll_enabled = was_syncing
+            return False
+        
+        GLib.timeout_add(150, reset_flags)
 
     def connect_scroll_changed(self, callback):
         """Register a callback for scroll changes."""
