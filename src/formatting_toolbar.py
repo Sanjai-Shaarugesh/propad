@@ -390,20 +390,20 @@ class FormattingToolbar(Gtk.Popover):
     def _insert_heading(self, level):
         cursor = self.buffer.get_iter_at_mark(self.buffer.get_insert())
         line_num = cursor.get_line()
-        line_start, _ = self.buffer.get_iter_at_line(line_num)
-        line_end, _ = self.buffer.get_iter_at_line(line_num)
-
+        _, line_start = self.buffer.get_iter_at_line(line_num)
+        _, line_end = self.buffer.get_iter_at_line(line_num)
+    
         if not line_end.ends_line():
             line_end.forward_to_line_end()
-
+    
         line_text = self.buffer.get_text(line_start, line_end, True)
         stripped = line_text.lstrip("#").lstrip()
-
+    
         heading_prefix = "#" * level + " "
-
+    
         self.buffer.delete(line_start, line_end)
         self.buffer.insert(line_start, heading_prefix + stripped)
-
+    
         self.popdown()
 
     # ─────────────────────────────────────────────

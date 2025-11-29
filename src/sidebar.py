@@ -63,6 +63,40 @@ class SidebarWidget(Gtk.Box):
 
         # Setup scroll sync - delayed to ensure parent is ready
         GLib.idle_add(self._setup_scroll_sync)
+        
+        # Create stats label at the bottom
+        self._create_stats_label()
+
+    def _create_stats_label(self):
+        """Create and add statistics label at the bottom."""
+        self.stats_label = Gtk.Label()
+        self.stats_label.set_halign(Gtk.Align.START)
+        self.stats_label.set_margin_start(10)
+        self.stats_label.set_margin_end(10)
+        self.stats_label.set_margin_top(5)
+        self.stats_label.set_margin_bottom(5)
+        self.stats_label.add_css_class("dim-label")
+        self.stats_label.add_css_class("caption")
+        self._update_stats()
+        self.append(self.stats_label)
+
+    def _update_stats(self):
+        """Update word, letter, and paragraph count."""
+        text = self.get_text()
+        
+        # Count paragraphs (non-empty lines)
+        paragraphs = len([line for line in text.split('\n') if line.strip()])
+        
+        # Count words (split by whitespace)
+        words = len(text.split())
+        
+        # Count letters (excluding spaces and newlines)
+        letters = len([c for c in text if not c.isspace()])
+        
+        # Update label
+        self.stats_label.set_text(
+            f"Words: {words}  •  Letters: {letters}  •  Paragraphs: {paragraphs}"
+        )
 
     def _setup_shortcuts(self):
         """Setup keyboard shortcuts."""
@@ -128,6 +162,28 @@ class SidebarWidget(Gtk.Box):
             print(f"Sidebar poll error: {e}")
 
         return True
+
+    def get_scroll_percentage(self, callback):
+        """Get current scroll percentage."""
+        if not self._scroll_adjustment:
+            callback(0.0)
+            return
+            
+        try:
+            value = self._scroll_adjustment.get_value()
+            upper = self._scroll_adjustment.get_upper()
+            page_size = self._scroll_adjustment.get_page_size()
+            
+            max_scroll = upper - page_size
+            if max_scroll <= 0:
+                percentage = 0.0
+            else:
+                percentage = value / max_scroll
+                
+            callback(percentage)
+        except Exception as e:
+            print(f"Error getting scroll percentage: {e}")
+            callback(0.0)
 
     def scroll_to_percentage(self, percentage: float):
         """Scroll smoothly with optimized rendering."""
@@ -213,6 +269,10 @@ class SidebarWidget(Gtk.Box):
 
     def _on_buffer_changed(self, buffer):
         """Call all registered callbacks when text changes."""
+        # Update statistics
+        self._update_stats()
+        
+        # Call text changed callbacks
         for callback in self._text_changed_callbacks:
             callback(self.get_text())
 
@@ -224,15 +284,6 @@ class SidebarWidget(Gtk.Box):
     def connect_text_changed(self, callback):
         """Register a callback for text changes."""
         self._text_changed_callbacks.append(callback)
-        
-    def _on_buffer_changed(self, buffer):
-            """Call all registered callbacks when text changes."""
-            for callback in self._text_changed_callbacks:
-                callback(self.get_text())
-    
-    def connect_text_changed(self, callback):
-            """Register a callback for text changes."""
-            self._text_changed_callbacks.append(callback)
 
     def connect_hide_webview(self, callback):
         """Register a callback for hide webview button."""
@@ -246,11 +297,13 @@ class SidebarWidget(Gtk.Box):
     def set_text(self, text: str):
         """Set text and trigger callbacks."""
         self.buffer.set_text(text)
+        self._update_stats()
         for callback in self._text_changed_callbacks:
             callback(text)
 
     def clear(self):
         self.buffer.set_text("")
+        self._update_stats()
         for callback in self._text_changed_callbacks:
             callback("")
 
@@ -263,3 +316,8 @@ class SidebarWidget(Gtk.Box):
         """Set cursor position."""
         cursor_iter = self.buffer.get_iter_at_offset(offset)
         self.buffer.place_cursor(cursor_iter)
+    
+    def _apply_theme(self, dark: bool):
+        """Apply dark/light theme to the textview."""
+        # This method can be called from window.py to update theme
+        pass

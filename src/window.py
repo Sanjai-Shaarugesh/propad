@@ -607,7 +607,7 @@ Start editing to see the preview!"""
         """Show about dialog."""
         about = Adw.AboutDialog.new()
         about.set_application_name("ProPad")
-        about.set_application_icon("text-editor-symbolic")
+        about.set_application_icon("io.github.sanjai.Pro")
         about.set_developer_name("ProPad Team")
         about.set_version("2.0.0")
         about.set_website("https://github.com/yourusername/propad")
