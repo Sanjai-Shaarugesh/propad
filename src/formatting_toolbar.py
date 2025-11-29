@@ -2,7 +2,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 
-from gi.repository import Gtk, Gdk, Pango
+from gi.repository import Gtk, Gdk, Pango , Gio
 import os
 
 class TableGridSelector(Gtk.Popover):
@@ -361,8 +361,8 @@ class FormattingToolbar(Gtk.Popover):
         self.btn_quote.connect("clicked", lambda b: self._insert_block_quote())
         self.btn_code_block.connect("clicked", lambda b: self._insert_code_block())
 
-        self.btn_link.connect("clicked", self._on_insert_link)
-        self.btn_image.connect("clicked", self._on_insert_image)
+        self.btn_link.connect("clicked", self._insert_link)
+        self.btn_image.connect("clicked", self._insert_image)
         self.btn_table.connect("clicked", self._on_insert_table)
         self.btn_mermaid.connect("clicked", self._on_insert_mermaid)
         self.btn_latex.connect("clicked", self._on_insert_latex)
@@ -526,22 +526,80 @@ class FormattingToolbar(Gtk.Popover):
     # ─────────────────────────────────────────────
     # LINKS, IMAGE, TABLE, MERMAID, LATEX
     # ─────────────────────────────────────────────
-    def _on_insert_link(self, button):
-        bounds = self.buffer.get_selection_bounds()
-        if bounds:
-            start, end = bounds
-            text = self.buffer.get_text(start, end, True)
-            self.buffer.delete(start, end)
-            self.buffer.insert(start, f"[{text}](url)")
-        else:
-            cursor = self.buffer.get_iter_at_mark(self.buffer.get_insert())
-            self.buffer.insert(cursor, "[text](url)")
+    def _insert_link(self, button):
+        dialog = Gtk.Dialog(
+            title="Insert Link", transient_for=self.parent_window, modal=True
+        )
+        dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+        dialog.add_button("Insert", Gtk.ResponseType.OK)
+
+        box = dialog.get_content_area()
+        box.set_spacing(12)
+        box.set_margin_start(12)
+        box.set_margin_end(12)
+        box.set_margin_top(12)
+        box.set_margin_bottom(12)
+
+        text_label = Gtk.Label(label="Link Text:")
+        text_label.set_halign(Gtk.Align.START)
+        text_entry = Gtk.Entry()
+        text_entry.set_placeholder_text("Click here")
+
+        url_label = Gtk.Label(label="URL:")
+        url_label.set_halign(Gtk.Align.START)
+        url_entry = Gtk.Entry()
+        url_entry.set_placeholder_text("https://example.com")
+
+        box.append(text_label)
+        box.append(text_entry)
+        box.append(url_label)
+        box.append(url_entry)
+
+        dialog.connect(
+            "response", lambda d, r: self._on_link_response(d, r, text_entry, url_entry)
+        )
+        dialog.present()
         self.popdown()
 
-    def _on_insert_image(self, button):
-        cursor = self.buffer.get_iter_at_mark(self.buffer.get_insert())
-        self.buffer.insert(cursor, "![alt](url)")
+    def _on_link_response(self, dialog, response, text_entry, url_entry):
+        if response == Gtk.ResponseType.OK:
+            text = text_entry.get_text() or "link"
+            url = url_entry.get_text() or "https://"
+            cursor = self.buffer.get_iter_at_mark(self.buffer.get_insert())
+            self.buffer.insert(cursor, f"[{text}]({url})")
+        dialog.destroy()
+
+
+    def _insert_image(self, button):
+        dialog = Gtk.FileDialog()
+        dialog.set_title("Select Image")
+
+        filter_img = Gtk.FileFilter()
+        filter_img.set_name("Image Files")
+        filter_img.add_mime_type("image/*")
+        filter_img.add_pattern("*.png")
+        filter_img.add_pattern("*.jpg")
+        filter_img.add_pattern("*.jpeg")
+        filter_img.add_pattern("*.gif")
+        filter_img.add_pattern("*.webp")
+
+        filters = Gio.ListStore.new(Gtk.FileFilter)
+        filters.append(filter_img)
+        dialog.set_filters(filters)
+
+        dialog.open(self.parent_window, None, self._on_image_selected)
         self.popdown()
+
+    def _on_image_selected(self, dialog, result):
+        try:
+            file = dialog.open_finish(result)
+            if file:
+                filepath = file.get_path()
+                filename = file.get_basename()
+                cursor = self.buffer.get_iter_at_mark(self.buffer.get_insert())
+                self.buffer.insert(cursor, f"![{filename}]({filepath})\n")
+        except Exception as e:
+            print(f"Error selecting image: {e}") 
 
     def _on_insert_table(self, button):
         """Show interactive table grid selector"""

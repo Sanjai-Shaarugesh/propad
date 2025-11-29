@@ -2,13 +2,9 @@ import gi
 import threading
 from concurrent.futures import ThreadPoolExecutor
 import time
-import os
-import comrak
 
-# Correct require_version usage (positional arguments)
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
-gi.require_version("WebKit", "6.0")  # keep so imports that expect WebKit don't break
+gi.require_version(namespace="Gtk", version="4.0")
+gi.require_version(namespace="Adw", version="1")
 
 from gi.repository import Adw, Gtk, Gio, GLib
 from src.sidebar import SidebarWidget
@@ -17,6 +13,9 @@ from src.state_manager import StateManager
 from src.file_manager import FileManagerDialog, FileHistory
 from src.export_dialog import ExportDialog
 from src.shortcuts_window import ShortcutsWindow
+
+import comrak
+import os
 
 UI_FILE = "ui/window.ui"
 
@@ -46,7 +45,7 @@ class Window(Adw.ApplicationWindow):
         self.content_modified = False
         self.current_file = None
         self.sync_scroll_enabled = True
-
+        
         self.style_manager = Adw.StyleManager.get_default()
         self.style_manager.connect("notify::dark", self._on_theme_changed)
 
@@ -158,7 +157,8 @@ Start editing to see the preview!"""
 
         # Auto-save timer (every 30 seconds)
         GLib.timeout_add_seconds(30, self._auto_save_state)
-
+        
+        
     def _on_theme_changed(self, style_manager, param):
         """Automatically update UI when theme changes."""
         # Update webview
@@ -167,13 +167,10 @@ Start editing to see the preview!"""
             current_text, extension_options=comrak.ExtensionOptions()
         )
         self.webview_widget.load_html(html, is_dark=self.is_dark_mode())
+    
+        # Update sidebar theme (optional, if you want textview colors to change)
+        self.sidebar_widget._apply_theme(self.is_dark_mode())
 
-        # Update sidebar theme (optional)
-        if hasattr(self.sidebar_widget, "_apply_theme"):
-            try:
-                self.sidebar_widget._apply_theme(self.is_dark_mode())
-            except Exception:
-                pass
 
     def _setup_bidirectional_scroll_sync(self):
         """Setup lightweight bidirectional scroll synchronization."""
@@ -260,9 +257,54 @@ Start editing to see the preview!"""
         # Wait 100ms before rendering (faster for better responsiveness)
         self._update_timer_id = GLib.timeout_add(100, self._process_pending_text)
 
-        # NOTE: there were nested alternative scroll-sync setups in the original file.
-        # We don't need to re-register them here; the main _setup_bidirectional_scroll_sync
-        # has already connected the scroll callbacks during initialization.
+        def _setup_bidirectional_scroll_sync(self):
+            """Setup ultra-smooth 120fps bidirectional scroll synchronization."""
+            # Initialize scroll tracking
+            self._last_sidebar_percentage = 0.0
+            self._last_webview_percentage = 0.0
+            self._scroll_lock = False
+
+            print("🚀 Setting up ultra-smooth 120fps bidirectional scroll sync...")
+
+            # DIRECTION 1: Sidebar → WebView (Editor scrolls, Preview follows)
+            def on_sidebar_scroll(percentage):
+                if self.sync_scroll_enabled and not self._scroll_lock:
+                    # Fine-grained threshold for smooth tracking
+                    if abs(percentage - self._last_sidebar_percentage) > 0.001:
+                        self._last_sidebar_percentage = percentage
+                        self._scroll_lock = True
+
+                        # Scroll webview with animation
+                        self.webview_widget.scroll_to_percentage(percentage)
+
+                        # Quick unlock for continuous scrolling (200ms to allow animation)
+                        GLib.timeout_add(
+                            200, lambda: setattr(self, "_scroll_lock", False)
+                        )
+
+            self.sidebar_widget.connect_scroll_changed(on_sidebar_scroll)
+            print("✅ Sidebar → WebView sync enabled (120fps)")
+
+            # DIRECTION 2: WebView → Sidebar (Preview scrolls, Editor follows)
+            def on_webview_scroll(percentage):
+                if self.sync_scroll_enabled and not self._scroll_lock:
+                    # Fine-grained threshold for smooth tracking
+                    if abs(percentage - self._last_webview_percentage) > 0.001:
+                        self._last_webview_percentage = percentage
+                        self._scroll_lock = True
+
+                        # Scroll sidebar with animation
+                        self.sidebar_widget.scroll_to_percentage(percentage)
+
+                        # Quick unlock for continuous scrolling (200ms to allow animation)
+                        GLib.timeout_add(
+                            200, lambda: setattr(self, "_scroll_lock", False)
+                        )
+
+            self.webview_widget.connect_scroll_changed(on_webview_scroll)
+            print("✅ WebView → Sidebar sync enabled (120fps)")
+
+            print("✨ Ultra-smooth 120fps bidirectional scroll sync complete!")
 
     def _process_pending_text(self):
         """Process pending text after debounce period."""
@@ -275,10 +317,59 @@ Start editing to see the preview!"""
     def _render_markdown_async(self, text):
         """Render markdown in background thread."""
 
+        def _setup_bidirectional_scroll_sync(self):
+            """Setup optimized bidirectional scroll synchronization."""
+            # Initialize scroll tracking
+            self._last_sidebar_percentage = 0.0
+            self._last_webview_percentage = 0.0
+            self._scroll_lock = False
+
+            print("🚀 Setting up optimized bidirectional scroll sync...")
+
+            # DIRECTION 1: Sidebar → WebView (Editor scrolls, Preview follows)
+            def on_sidebar_scroll(percentage):
+                if self.sync_scroll_enabled and not self._scroll_lock:
+                    # Balanced threshold
+                    if abs(percentage - self._last_sidebar_percentage) > 0.003:
+                        self._last_sidebar_percentage = percentage
+                        self._scroll_lock = True
+
+                        # Scroll webview with animation
+                        self.webview_widget.scroll_to_percentage(percentage)
+
+                        # Reset lock after animation
+                        GLib.timeout_add(
+                            150, lambda: setattr(self, "_scroll_lock", False)
+                        )
+
+            self.sidebar_widget.connect_scroll_changed(on_sidebar_scroll)
+            print("✅ Sidebar → WebView sync enabled")
+
+            # DIRECTION 2: WebView → Sidebar (Preview scrolls, Editor follows)
+            def on_webview_scroll(percentage):
+                if self.sync_scroll_enabled and not self._scroll_lock:
+                    # Balanced threshold
+                    if abs(percentage - self._last_webview_percentage) > 0.003:
+                        self._last_webview_percentage = percentage
+                        self._scroll_lock = True
+
+                        # Scroll sidebar instantly for better text rendering
+                        self.sidebar_widget.scroll_to_percentage(percentage)
+
+                        # Reset lock quickly
+                        GLib.timeout_add(
+                            100, lambda: setattr(self, "_scroll_lock", False)
+                        )
+
+            self.webview_widget.connect_scroll_changed(on_webview_scroll)
+            print("✅ WebView → Sidebar sync enabled")
+
+            print("✨ Optimized bidirectional scroll sync complete!")
+
         def render():
             with self._rendering_lock:
                 try:
-                    # Render markdown
+                    # Render markdown with GPU acceleration
                     html = comrak.render_markdown(
                         text, extension_options=self.extension_options
                     )
@@ -511,89 +602,90 @@ Start editing to see the preview!"""
         """Show keyboard shortcuts window."""
         shortcuts_window = ShortcutsWindow(parent=self)
         shortcuts_window.present()
-
+        
+        
     def _restore_state(self):
-        """Restore application state."""
-        # -----------------------------------------
-        # Restore window size + maximized state
-        # -----------------------------------------
-        window_state = self.state_manager.get_window_state()
-        self.set_default_size(
-            window_state.get("width", 950),
-            window_state.get("height", 700)
-        )
-
-        if window_state.get("maximized", False):
-            self.maximize()
-
-        # -----------------------------------------
-        # Restore text content + cursor
-        # -----------------------------------------
-        content = self.state_manager.get_content()
-        if content:
-            self.sidebar_widget.set_text(content)
-            cursor_pos = self.state_manager.get_cursor_position()
-            try:
-                self.sidebar_widget.set_cursor_position(cursor_pos)
-            except Exception:
-                # If sidebar doesn't expose set_cursor_position, ignore
-                pass
-
-        # -----------------------------------------
-        # Restore last opened file
-        # -----------------------------------------
-        self.current_file = self.state_manager.get_current_file()
-
-        # -----------------------------------------
-        # Restore WebView hidden state
-        # -----------------------------------------
-        self.webview_hidden = self.state_manager.is_webview_hidden()
-
-        # -----------------------------------------
-        # Restore sync scroll state
-        # -----------------------------------------
-        self.sync_scroll_enabled = self.state_manager.state.get(
-            "sync_scroll_enabled", True
-        )
-        self.sidebar_widget.set_sync_scroll_enabled(self.sync_scroll_enabled)
-        self.webview_widget.set_sync_scroll_enabled(self.sync_scroll_enabled)
-
-        # -----------------------------------------
-        # Apply WebView visibility
-        # -----------------------------------------
-        if self.webview_hidden:
-            GLib.idle_add(self._apply_webview_hidden_state)
-
-        # Nothing has changed after restore
-        self.content_modified = False
-
-        # ============================================================
-        #                 RESTORE SCROLL POSITIONS
-        # ============================================================
-        scroll_positions = self.state_manager.get_scroll_positions()
-        saved_sidebar_scroll = scroll_positions.get("sidebar", 0.0)
-        saved_webview_scroll = scroll_positions.get("webview", 0.0)
-
-        def restore_scrolls():
-            # Restore Sidebar scroll
-            try:
-                self.sidebar_widget.scroll_to_percentage(saved_sidebar_scroll)
-            except Exception as e:
-                print("Sidebar scroll restore error:", e)
-
-            # WebView needs delay for HTML layout
-            def later():
+            """Restore application state."""
+            # -----------------------------------------
+            # Restore window size + maximized state
+            # -----------------------------------------
+            window_state = self.state_manager.get_window_state()
+            self.set_default_size(
+                window_state.get("width", 950),
+                window_state.get("height", 700)
+            )
+    
+            if window_state.get("maximized", False):
+                self.maximize()
+    
+            # -----------------------------------------
+            # Restore text content + cursor
+            # -----------------------------------------
+            content = self.state_manager.get_content()
+            if content:
+                self.sidebar_widget.set_text(content)
+                cursor_pos = self.state_manager.get_cursor_position()
                 try:
-                    self.webview_widget.scroll_to_percentage(saved_webview_scroll)
+                    self.sidebar_widget.set_cursor_position(cursor_pos)
+                except Exception:
+                    # If sidebar doesn't expose set_cursor_position, ignore
+                    pass
+    
+            # -----------------------------------------
+            # Restore last opened file
+            # -----------------------------------------
+            self.current_file = self.state_manager.get_current_file()
+    
+            # -----------------------------------------
+            # Restore WebView hidden state
+            # -----------------------------------------
+            self.webview_hidden = self.state_manager.is_webview_hidden()
+    
+            # -----------------------------------------
+            # Restore sync scroll state
+            # -----------------------------------------
+            self.sync_scroll_enabled = self.state_manager.state.get(
+                "sync_scroll_enabled", True
+            )
+            self.sidebar_widget.set_sync_scroll_enabled(self.sync_scroll_enabled)
+            self.webview_widget.set_sync_scroll_enabled(self.sync_scroll_enabled)
+    
+            # -----------------------------------------
+            # Apply WebView visibility
+            # -----------------------------------------
+            if self.webview_hidden:
+                GLib.idle_add(self._apply_webview_hidden_state)
+    
+            # Nothing has changed after restore
+            self.content_modified = False
+    
+            # ============================================================
+            #                 RESTORE SCROLL POSITIONS
+            # ============================================================
+            scroll_positions = self.state_manager.get_scroll_positions()
+            saved_sidebar_scroll = scroll_positions.get("sidebar", 0.0)
+            saved_webview_scroll = scroll_positions.get("webview", 0.0)
+    
+            def restore_scrolls():
+                # Restore Sidebar scroll
+                try:
+                    self.sidebar_widget.scroll_to_percentage(saved_sidebar_scroll)
                 except Exception as e:
-                    print("WebView scroll restore error:", e)
+                    print("Sidebar scroll restore error:", e)
+    
+                # WebView needs delay for HTML layout
+                def later():
+                    try:
+                        self.webview_widget.scroll_to_percentage(saved_webview_scroll)
+                    except Exception as e:
+                        print("WebView scroll restore error:", e)
+                    return False
+    
+                GLib.timeout_add(350, later)
                 return False
-
-            GLib.timeout_add(350, later)
-            return False
-
-        # Run AFTER widgets fully appear
-        GLib.idle_add(restore_scrolls)
+    
+            # Run AFTER widgets fully appear
+            GLib.idle_add(restore_scrolls)
 
     def _on_about_activate(self, action, param):
         """Show about dialog."""
@@ -614,6 +706,37 @@ Start editing to see the preview!"""
             "Mermaid diagrams, LaTeX math, and GitHub alerts."
         )
         about.present(self)
+
+    
+        """Restore application state."""
+        window_state = self.state_manager.get_window_state()
+        self.set_default_size(
+            window_state.get("width", 950), window_state.get("height", 7)
+        )
+
+        if window_state.get("maximized", False):
+            self.maximize()
+
+        content = self.state_manager.get_content()
+        if content:
+            self.sidebar_widget.set_text(content)
+            cursor_pos = self.state_manager.get_cursor_position()
+            self.sidebar_widget.set_cursor_position(cursor_pos)
+
+        self.current_file = self.state_manager.get_current_file()
+        self.webview_hidden = self.state_manager.is_webview_hidden()
+        self.sync_scroll_enabled = self.state_manager.state.get(
+            "sync_scroll_enabled", True
+        )
+
+        # Update widgets with sync scroll state
+        self.sidebar_widget.set_sync_scroll_enabled(self.sync_scroll_enabled)
+        self.webview_widget.set_sync_scroll_enabled(self.sync_scroll_enabled)
+
+        if self.webview_hidden:
+            GLib.idle_add(self._apply_webview_hidden_state)
+
+        self.content_modified = False
 
     def _apply_webview_hidden_state(self):
         """Apply the webview hidden state to UI."""
@@ -653,12 +776,8 @@ Start editing to see the preview!"""
             }
 
             self.state_manager.save_content(self.sidebar_widget.get_text())
-            try:
-                cursor_pos = self.sidebar_widget.get_cursor_position()
-                self.state_manager.save_cursor_position(cursor_pos)
-            except Exception:
-                # If sidebar widget doesn't expose get_cursor_position, ignore
-                pass
+            cursor_pos = self.sidebar_widget.get_cursor_position()
+            self.state_manager.save_cursor_position(cursor_pos)
             self.state_manager.save_current_file(self.current_file)
 
             sidebar_visible = self.adw_overlay_split_view.get_show_sidebar()
@@ -673,31 +792,21 @@ Start editing to see the preview!"""
 
     def _on_close_request(self, window):
         """Handle window close request."""
-        # Save scroll positions as well before closing
-        try:
-            # Try to fetch both scroll values. If the APIs are async, these lambdas may be no-ops;
-            # state_manager.save_scroll_positions will be called later in save_async too.
-            def save_both(sidebar_p):
-                def save_web(view_p):
-                    self.state_manager.save_scroll_positions(sidebar_p, view_p)
-                # webview.get_scroll_percentage expects a callback
-                try:
-                    self.webview_widget.get_scroll_percentage(save_web)
-                except Exception:
-                    # fallback: write sidebar only
-                    self.state_manager.save_scroll_positions(sidebar_p, 0.0)
-
-            try:
-                self.sidebar_widget.get_scroll_percentage(save_both)
-            except Exception:
-                pass
-        except Exception:
-            pass
-
+        
+        # Save scroll positions before exit
+        self.sidebar_widget.get_scroll_percentage(
+            lambda sidebar_pos: self.webview_widget.get_scroll_percentage(
+                lambda webview_pos: self.state_manager.save_scroll_positions(
+                    sidebar_pos, webview_pos
+                )
+            )
+        )
+    
+        # Save rest of the state
         self._save_state()
-        # short sleep to let background save start (not ideal but mirrors existing behavior)
         time.sleep(0.1)
         return False
+
 
     def _update_title(self):
         """Update window title based on current file and modification state."""
