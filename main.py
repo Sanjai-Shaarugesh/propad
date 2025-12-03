@@ -10,19 +10,17 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Gtk, Adw, Gio, GLib
 
-# Initialize translations FIRST before any UI code
-from src.i18n import init_locale, _
+
+from propad.i18n import init_locale, _
 
 init_locale()
 
-# Now import other modules (they can use _ if needed)
-from src.window import Window
-from src.shortcuts_window import ShortcutsWindow
+
+from propad.window import Window
+from propad.shortcuts_window import ShortcutsWindow
 
 
 class PropadApplication(Adw.Application):
-    """Main application class with multi-window support and file handling."""
-
     def __init__(self):
         super().__init__(
             application_id="io.github.sanjai.PropPad",
@@ -32,12 +30,9 @@ class PropadApplication(Adw.Application):
         self.windows = []
 
     def do_activate(self):
-        """Called when the application is activated."""
-        # Open a window if none exists
         if not self.windows:
             self._open_new_window()
         else:
-            # Present the most recently focused window
             if self.windows:
                 self.windows[-1].present()
 
@@ -48,22 +43,17 @@ class PropadApplication(Adw.Application):
         self._setup_menu()
 
     def do_open(self, files, n_files, hint):
-        """Handle opening files (from Nautilus or command line)."""
         for file in files:
             filepath = file.get_path()
             if filepath and os.path.exists(filepath):
-                # Check if file is already open in any window
                 window = self._find_window_with_file(filepath)
                 if window:
-                    # File already open, just present that window
                     window.present()
                 else:
-                    # Open file in new window
                     self._open_new_window(filepath)
             else:
-                print(f"⚠️ File not found: {filepath}")
+                None
 
-        # If no files were opened, just activate
         if not self.windows:
             self.do_activate()
 
@@ -71,22 +61,18 @@ class PropadApplication(Adw.Application):
         """Handle command-line arguments."""
         options = command_line.get_arguments()[1:]  # skip program name
 
-        # Handle file paths
         files_to_open = []
         for arg in options:
             if arg.startswith("--") or arg.startswith("-"):
-                # Skip flags
                 if arg in ["--new-window", "-n"]:
                     self._open_new_window()
                     continue
             else:
-                # Treat as file path
                 if os.path.exists(arg):
                     files_to_open.append(arg)
                 else:
-                    print(f"⚠️ File not found: {arg}")
+                    None
 
-        # Open files
         if files_to_open:
             for filepath in files_to_open:
                 window = self._find_window_with_file(filepath)
@@ -95,7 +81,6 @@ class PropadApplication(Adw.Application):
                 else:
                     self._open_new_window(filepath)
         else:
-            # No files specified, just activate
             if not self.windows:
                 self._open_new_window()
             else:
@@ -125,16 +110,11 @@ class PropadApplication(Adw.Application):
         # Remove window from list when closed
         window.connect("close-request", lambda w: self._on_window_closed(w))
 
-        if filepath:
-            print(f"✨ New window opened with file: {filepath}")
-        else:
-            print(f"✨ New window opened. Total windows: {len(self.windows)}")
-
     def _on_window_closed(self, window):
         """Handle window close event."""
         if window in self.windows:
             self.windows.remove(window)
-        print(f"📉 Window closed. Remaining windows: {len(self.windows)}")
+
         return False
 
     def _setup_menu(self):

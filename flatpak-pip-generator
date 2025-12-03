@@ -181,7 +181,7 @@ def get_poetry_deps(pyproject_data: dict[str, Any]) -> list[str]:
 
 def get_pypi_url(name: str, filename: str) -> str:
     url = f"https://pypi.org/pypi/{name}/json"
-    print("Extracting download url for", name)
+   
     with urllib.request.urlopen(url) as response:  # noqa: S310
         body = json.loads(response.read().decode("utf-8"))
         for release in body["releases"].values():
@@ -235,7 +235,7 @@ def get_file_version(filename: str) -> str:
 
 def get_file_hash(filename: str) -> str:
     sha = hashlib.sha256()
-    print("Generating hash for", filename.split("/")[-1])
+    
     with open(filename, "rb") as f:
         while True:
             data = f.read(1024 * 1024 * 32)

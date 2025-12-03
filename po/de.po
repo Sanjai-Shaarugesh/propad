@@ -25,11 +25,11 @@ msgstr "Dateimanager"
 msgid "Export"
 msgstr "Exportieren"
 
-#: main.py:140 src/search_replace.py:100
+#: main.py:140 propad/search_replace.py:100
 msgid "Find"
 msgstr "Suchen"
 
-#: main.py:150 src/search_replace.py:110
+#: main.py:150 propad/search_replace.py:110
 msgid "Replace"
 msgstr "Ersetzen"
 
@@ -41,314 +41,314 @@ msgstr "Tastenkürzel"
 msgid "About ProPad"
 msgstr "Über ProPad"
 
-#: src/window.py:200
+#: propad/window.py:200
 msgid "Welcome to ProPad"
 msgstr "Willkommen bei ProPad"
 
-#: src/window.py:202
+#: propad/window.py:202
 msgid "Features"
 msgstr "Funktionen"
 
-#: src/window.py:204
+#: propad/window.py:204
 msgid "Live Preview"
 msgstr "Live-Vorschau"
 
-#: src/window.py:204
+#: propad/window.py:204
 msgid "with synchronized scrolling"
 msgstr "mit synchronisiertem Scrollen"
 
-#: src/window.py:205
+#: propad/window.py:205
 msgid "Markdown Tables"
 msgstr "Markdown-Tabellen"
 
-#: src/window.py:205
+#: propad/window.py:205
 msgid "support"
 msgstr "Unterstützung"
 
-#: src/window.py:206
+#: propad/window.py:206
 msgid "Mermaid Diagrams"
 msgstr "Mermaid-Diagramme"
 
-#: src/window.py:206
+#: propad/window.py:206
 msgid "rendering"
 msgstr "Rendering"
 
-#: src/window.py:207
+#: propad/window.py:207
 msgid "LaTeX Math"
 msgstr "LaTeX-Mathematik"
 
-#: src/window.py:207
+#: propad/window.py:207
 msgid "equations"
 msgstr "Gleichungen"
 
-#: src/window.py:208
+#: propad/window.py:208
 msgid "GitHub Alerts"
 msgstr "GitHub-Benachrichtigungen"
 
-#: src/window.py:209
+#: propad/window.py:209
 msgid "File History"
 msgstr "Dateiverlauf"
 
-#: src/window.py:209
+#: propad/window.py:209
 msgid "with tags"
 msgstr "mit Tags"
 
-#: src/window.py:212
+#: propad/window.py:212
 msgid "This is a GitHub-style note alert!"
 msgstr "Dies ist eine GitHub-ähnliche Notizwarnung!"
 
-#: src/window.py:214
+#: propad/window.py:214
 msgid "Start editing to see the preview!"
 msgstr "Beginnen Sie mit der Bearbeitung, um die Vorschau zu sehen!"
 
-#: src/window.py:300
+#: propad/window.py:300
 msgid "Save Changes?"
 msgstr "Änderungen speichern?"
 
-#: src/window.py:301
+#: propad/window.py:301
 msgid "The document has unsaved changes. Do you want to save them?"
 msgstr ""
 "Das Dokument enthält ungespeicherte Änderungen. Möchten Sie sie speichern?"
 
-#: src/window.py:302
+#: propad/window.py:302
 msgid "Discard"
 msgstr "Verwerfen"
 
-#: src/window.py:303
+#: propad/window.py:303
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: src/window.py:304
+#: propad/window.py:304
 msgid "Save"
 msgstr "Speichern"
 
-#: src/window.py:350
+#: propad/window.py:350
 msgid "Open Markdown File"
 msgstr "Markdown-Datei öffnen"
 
-#: src/window.py:352
+#: propad/window.py:352
 msgid "Markdown Files"
 msgstr "Markdown-Dateien"
 
-#: src/window.py:356
+#: propad/window.py:356
 msgid "All Files"
 msgstr "Alle Dateien"
 
-#: src/window.py:400
+#: propad/window.py:400
 msgid "Save Markdown File"
 msgstr "Markdown-Datei speichern"
 
-#: src/window.py:450
+#: propad/window.py:450
 msgid "Untitled"
 msgstr "Unbenannt"
 
-#: src/window.py:500
+#: propad/window.py:500
 msgid "ProPad"
 msgstr "ProPad"
 
-#: src/window.py:550
+#: propad/window.py:550
 msgid "Sync Scroll Enabled"
 msgstr "Synchronisiertes Scrollen aktiviert"
 
-#: src/window.py:552
+#: propad/window.py:552
 msgid "Sync Scroll Disabled"
 msgstr "Synchronisiertes Scrollen deaktiviert"
 
-#: src/window.py:600
+#: propad/window.py:600
 msgid "Hide Preview"
 msgstr "Vorschau ausblenden"
 
-#: src/window.py:602
+#: propad/window.py:602
 msgid "Show Preview"
 msgstr "Vorschau anzeigen"
 
-#: src/export_dialog.py:100
+#: propad/export_dialog.py:100
 msgid "Export as HTML"
 msgstr "Als HTML exportieren"
 
-#: src/export_dialog.py:110
+#: propad/export_dialog.py:110
 msgid "HTML Files"
 msgstr "HTML-Dateien"
 
-#: src/export_dialog.py:150
+#: propad/export_dialog.py:150
 msgid "HTML Export Successful"
 msgstr "HTML-Export erfolgreich"
 
-#: src/export_dialog.py:151
+#: propad/export_dialog.py:151
 msgid "Document exported to:"
 msgstr "Dokument exportiert nach:"
 
-#: src/export_dialog.py:200
+#: propad/export_dialog.py:200
 msgid "Export as PDF"
 msgstr "Als PDF exportieren"
 
-#: src/export_dialog.py:250
+#: propad/export_dialog.py:250
 msgid "PDF Export Successful"
 msgstr "PDF-Export erfolgreich"
 
-#: src/export_dialog.py:300
+#: propad/export_dialog.py:300
 msgid "Export as Image"
 msgstr "Als Bild exportieren"
 
-#: src/export_dialog.py:310
+#: propad/export_dialog.py:310
 msgid "Image Files"
 msgstr "Bilddateien"
 
-#: src/export_dialog.py:350
+#: propad/export_dialog.py:350
 msgid "Image Export Successful"
 msgstr "Bild-Export erfolgreich"
 
-#: src/export_dialog.py:400
+#: propad/export_dialog.py:400
 msgid "Export Failed"
 msgstr "Export fehlgeschlagen"
 
-#: src/file_manager.py:100
+#: propad/file_manager.py:100
 msgid "Clear History?"
 msgstr "Verlauf löschen?"
 
-#: src/file_manager.py:101
+#: propad/file_manager.py:101
 msgid "This will remove all file history. This action cannot be undone."
 msgstr ""
 "Dadurch wird der gesamte Dateiverlauf gelöscht. Diese Aktion kann nicht "
 "rückgängig gemacht werden."
 
-#: src/file_manager.py:102
+#: propad/file_manager.py:102
 msgid "Clear History"
 msgstr "Verlauf löschen"
 
-#: src/file_manager.py:150
+#: propad/file_manager.py:150
 msgid "Remove from history"
 msgstr "Aus Verlauf entfernen"
 
-#: src/file_manager.py:200
+#: propad/file_manager.py:200
 msgid "Created"
 msgstr "Erstellt"
 
-#: src/file_manager.py:201
+#: propad/file_manager.py:201
 msgid "Opened"
 msgstr "Geöffnet"
 
-#: src/file_manager.py:202
+#: propad/file_manager.py:202
 msgid "Edited"
 msgstr "Bearbeitet"
 
-#: src/file_manager.py:250
+#: propad/file_manager.py:250
 msgid "Opened {count}x"
 msgstr "{count}-mal geöffnet"
 
-#: src/formatting_toolbar.py:100
+#: propad/formatting_toolbar.py:100
 msgid "Insert Table"
 msgstr "Tabelle einfügen"
 
-#: src/formatting_toolbar.py:150
+#: propad/formatting_toolbar.py:150
 msgid "Rows"
 msgstr "Zeilen"
 
-#: src/formatting_toolbar.py:151
+#: propad/formatting_toolbar.py:151
 msgid "Cols"
 msgstr "Spalten"
 
-#: src/formatting_toolbar.py:200 src/shortcuts_window.py:73
+#: propad/formatting_toolbar.py:200 propad/shortcuts_window.py:73
 msgid "Insert Link"
 msgstr "Link einfügen"
 
-#: src/formatting_toolbar.py:201
+#: propad/formatting_toolbar.py:201
 msgid "Link Text:"
 msgstr "Link-Text:"
 
-#: src/formatting_toolbar.py:202
+#: propad/formatting_toolbar.py:202
 msgid "Click here"
 msgstr "Hier klicken"
 
-#: src/formatting_toolbar.py:203
+#: propad/formatting_toolbar.py:203
 msgid "URL:"
 msgstr "URL:"
 
-#: src/formatting_toolbar.py:250
+#: propad/formatting_toolbar.py:250
 msgid "Select Image"
 msgstr "Bild auswählen"
 
-#: src/search_replace.py:120
+#: propad/search_replace.py:120
 msgid "Replace All"
 msgstr "Alles ersetzen"
 
-#: src/sidebar.py:100
+#: propad/sidebar.py:100
 msgid "Words"
 msgstr "Wörter"
 
-#: src/sidebar.py:101
+#: propad/sidebar.py:101
 msgid "Letters"
 msgstr "Buchstaben"
 
-#: src/sidebar.py:102
+#: propad/sidebar.py:102
 msgid "Paragraphs"
 msgstr "Absätze"
 
-#: src/shortcuts_window.py:50
+#: propad/shortcuts_window.py:50
 msgid "File Operations"
 msgstr "Dateioperationen"
 
-#: src/shortcuts_window.py:51
+#: propad/shortcuts_window.py:51
 msgid "New File"
 msgstr "Neue Datei"
 
-#: src/shortcuts_window.py:52
+#: propad/shortcuts_window.py:52
 msgid "Open File"
 msgstr "Datei öffnen"
 
-#: src/shortcuts_window.py:53
+#: propad/shortcuts_window.py:53
 msgid "Save File"
 msgstr "Datei speichern"
 
-#: src/shortcuts_window.py:54
+#: propad/shortcuts_window.py:54
 msgid "Save As"
 msgstr "Speichern unter"
 
-#: src/shortcuts_window.py:60
+#: propad/shortcuts_window.py:60
 msgid "Text Formatting"
 msgstr "Textformatierung"
 
-#: src/shortcuts_window.py:61
+#: propad/shortcuts_window.py:61
 msgid "Bold"
 msgstr "Fett"
 
-#: src/shortcuts_window.py:62
+#: propad/shortcuts_window.py:62
 msgid "Italic"
 msgstr "Kursiv"
 
-#: src/shortcuts_window.py:63
+#: propad/shortcuts_window.py:63
 msgid "Strikethrough"
 msgstr "Durchgestrichen"
 
-#: src/shortcuts_window.py:64
+#: propad/shortcuts_window.py:64
 msgid "Code"
 msgstr "Code"
 
-#: src/shortcuts_window.py:70
+#: propad/shortcuts_window.py:70
 msgid "Editing"
 msgstr "Bearbeiten"
 
-#: src/shortcuts_window.py:71
+#: propad/shortcuts_window.py:71
 msgid "Find Text"
 msgstr "Text suchen"
 
-#: src/shortcuts_window.py:72
+#: propad/shortcuts_window.py:72
 msgid "Find and Replace"
 msgstr "Suchen und Ersetzen"
 
-#: src/shortcuts_window.py:80
+#: propad/shortcuts_window.py:80
 msgid "View"
 msgstr "Ansicht"
 
-#: src/shortcuts_window.py:81
+#: propad/shortcuts_window.py:81
 msgid "Toggle Sidebar"
 msgstr "Seitenleiste umschalten"
 
-#: src/shortcuts_window.py:82
+#: propad/shortcuts_window.py:82
 msgid "Toggle Sync Scroll"
 msgstr "Synchronisiertes Scrollen umschalten"
 
-#: src/shortcuts_window.py:83
+#: propad/shortcuts_window.py:83
 msgid "Show Shortcuts"
 msgstr "Tastenkürzel anzeigen"
 

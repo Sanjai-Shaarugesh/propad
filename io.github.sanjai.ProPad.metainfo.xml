@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="io.github.sanjai.ProPad">
   <id>io.github.sanjai.ProPad</id>
-  
-  <!-- Licensing -->
+
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
-  
-  <!-- Basic info -->
+
   <name>ProPadp</name>
-  <summary>A modern text editor with rich formatting</summary>
-  
+  <summary>A modern, safe, and adaptive text editor with rich formatting and multi-device sync</summary>
+
   <description>
     <p>
-      My GTK App is a modern, user-friendly text editor built with GTK 4 and Libadwaita.
+      ProPadp is a modern, user-friendly, and **adaptive** text editor built with GTK 4 and Libadwaita.
       It provides a clean interface for writing and editing documents with rich formatting capabilities.
+      With **multi-device synchronization**, you can seamlessly access and edit your notes across different platforms.
+      The application is designed to be **safe and secure**, with a focus on data integrity.
     </p>
-    <p>Features include:</p>
+    <p>Advanced features include:</p>
     <ul>
       <li>Clean and intuitive interface following GNOME HIG</li>
       <li>Rich text formatting with toolbar</li>
@@ -24,40 +24,41 @@
       <li>Export to multiple formats</li>
       <li>Dark mode support</li>
       <li>Auto-save functionality</li>
+      <li>**GPU-accelerated rendering** for smooth performance</li>
+      <li>**Synchronized scrolling** in preview modes</li>
+      <li>**File history tracking** and versioning</li>
+      <li>Support for **tables**, **Mermaid diagrams**, **LaTeX math** ($E=mc^2$), and **GitHub alerts**</li>
+      <li>**Multi-device synchronization** (via user-configured service)</li>
     </ul>
     <p>
       Whether you're taking notes, writing documentation, or editing markdown files,
-      My GTK App provides all the tools you need in a distraction-free environment.
+      ProPadp provides all the tools you need in a distraction-free and highly capable environment.
     </p>
   </description>
-  
-  <!-- Developer info -->
+
   <developer id="io.github.sanjai.ProPad">
     <name>Sanjai Shaarugesh</name>
   </developer>
-  
-  <!-- Update contact (email or URL) -->
+
   <update_contact>shaarugesh6@gmail.com</update_contact>
-  
-  <!-- Homepage and support URLs -->
-  <url type="homepage">https://example.com/my-gtk-app</url>
-  <url type="bugtracker">https://github.com/yourusername/my-gtk-app/issues</url>
-  <url type="help">https://example.com/my-gtk-app/docs</url>
-  <url type="donation">https://example.com/donate</url>
-  <url type="vcs-browser">https://github.com/yourusername/my-gtk-app</url>
-  
-  <!-- Launchable -->
+
+  <url type="homepage">https://github.com/Sanjai-Shaarugesh/propad</url>
+  <url type="bugtracker">https://github.com/Sanjai-Shaarugesh/propad/issues</url>
+  <url type="help">https://github.com/Sanjai-Shaarugesh/propad</url>
+  <url type="donation">https://buymeacoffee.com/sanjai</url>
+  <url type="vcs-browser">https://github.com/Sanjai-Shaarugesh/propad</url>
+
   <launchable type="desktop-id">io.github.sanjai.ProPad.desktop</launchable>
-  
-  <!-- Provides (for package managers) -->
+
   <provides>
     <binary>ProPad</binary>
   </provides>
-  
-  <!-- Content rating (OARS) -->
-  <content_rating type="oars-1.1" />
-  
-  <!-- Screenshots -->
+
+  <content_rating type="oars-1.1">
+    <content_attribute id="social-chat">mild</content_attribute>
+    <content_attribute id="social-info">mild</content_attribute>
+  </content_rating>
+
   <screenshots>
     <screenshot type="default">
       <caption>Main window with editor</caption>
@@ -71,9 +72,16 @@
       <caption>File manager sidebar</caption>
       <image>https://example.com/screenshots/file-manager.png</image>
     </screenshot>
+    <screenshot>
+      <caption>Editing a document with a Mermaid diagram and LaTeX math</caption>
+      <image>https://example.com/screenshots/advanced-features.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>View of the file history tracking feature</caption>
+      <image>https://example.com/screenshots/file-history.png</image>
+    </screenshot>
   </screenshots>
-  
-  <!-- Release history -->
+
   <releases>
     <release version="0.3.0" date="2024-03-15">
       <description>
@@ -86,7 +94,7 @@
         </ul>
       </description>
     </release>
-    
+
     <release version="0.2.0" date="2024-02-01">
       <description>
         <p>Second beta release:</p>
@@ -98,7 +106,7 @@
         </ul>
       </description>
     </release>
-    
+
     <release version="0.1.0" date="2024-01-15">
       <description>
         <p>Initial release with core features:</p>
@@ -110,37 +118,42 @@
       </description>
     </release>
   </releases>
-  
-  <!-- Branding colors (optional) -->
+
   <branding>
     <color type="primary" scheme_preference="light">#3584e4</color>
     <color type="primary" scheme_preference="dark">#1c71d8</color>
   </branding>
-  
-  <!-- Categories -->
+
   <categories>
     <category>Utility</category>
     <category>TextEditor</category>
+    <category>Office</category>
   </categories>
-  
-  <!-- Keywords for search -->
+
   <keywords>
     <keyword>editor</keyword>
     <keyword>text</keyword>
     <keyword>notes</keyword>
     <keyword>markdown</keyword>
     <keyword>writing</keyword>
+    <keyword>sync</keyword>
+    <keyword>multi-device</keyword>
+    <keyword>safe</keyword>
+    <keyword>adaptive</keyword>
+    <keyword>latex</keyword>
+    <keyword>mermaid</keyword>
   </keywords>
-  
-  <!-- Requires specific versions -->
+
   <requires>
     <display_length compare="ge">360</display_length>
+    <hardware>
+      <display_feature>opengl</display_feature>
+    </hardware>
   </requires>
-  
-  <!-- Recommends -->
+
   <recommends>
     <control>keyboard</control>
     <control>pointing</control>
   </recommends>
-  
+
 </component>

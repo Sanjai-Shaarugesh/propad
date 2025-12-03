@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-scripts/update_manifest.py
-Generate Flatpak manifest entries for Python dependencies
-"""
-
 import os
 import glob
 

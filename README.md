@@ -80,24 +80,24 @@ flatpak run io.github.sanjai.ProPad
 - Python 3.10 or higher
 - GTK 4.10+
 - Libadwaita 1.4+
-- GtkSourceView 5
-- Meson build system
+- JUstFile
 
 #### Dependencies
 
+
 **Fedora/RHEL:**
 ```bash
-sudo dnf install python3 gtk4 libadwaita gtksourceview5 meson ninja-build python3-markdown python3-pygments
+sudo dnf install python3 gtk4 libadwaita gtksourceview5 just python3-markdown python3-pygments
 ```
 
 **Ubuntu/Debian:**
 ```bash
-sudo apt install python3 libgtk-4-dev libadwaita-1-dev libgtksourceview-5-dev meson ninja-build python3-markdown python3-pygments
+sudo apt install python3 libgtk-4-dev libadwaita-1-dev libgtksourceview-5-dev just python3-markdown python3-pygments
 ```
 
 **Arch Linux:**
 ```bash
-sudo pacman -S python gtk4 libadwaita gtksourceview5 meson python-markdown python-pygments
+sudo pacman -S python gtk4 libadwaita gtksourceview5 just python-markdown python-pygments
 ```
 
 #### Building
