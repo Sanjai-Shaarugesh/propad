@@ -27,6 +27,19 @@ class SidebarWidget(Gtk.Box):
 
         self.parent_window = parent_window
         self.buffer = self.textview.get_buffer()
+        
+        self._prevent_scroll_reset = False
+            
+            # Connect signals
+        self.buffer.connect("changed", self._on_buffer_changed)
+            
+            # Prevent cursor movements from resetting scroll
+        self.textview.set_accepts_tab(True)
+        
+        
+            
+            # Store scroll position before cursor operations
+        # self.textview.connect("button-press-event", self._on_button_press)
 
         # Thread pool for async operations
         self._thread_pool = ThreadPoolExecutor(max_workers=4)
@@ -67,6 +80,15 @@ class SidebarWidget(Gtk.Box):
 
         # Create stats label at the bottom
         self._create_stats_label()
+        
+    # def _on_button_press(self, widget, event):
+    #     """Store scroll position before click to prevent reset."""
+    #     if self._scroll_adjustment:
+    #         self._prevent_scroll_reset = True
+    #         self._stored_scroll_value = self._scroll_adjustment.get_value()
+    #         # Re-enable after a short delay
+    #         GLib.timeout_add(50, lambda: setattr(self, "_prevent_scroll_reset", False))
+    #     return False
 
     def _create_stats_label(self):
         """Create and add statistics label at the bottom."""
@@ -283,12 +305,26 @@ class SidebarWidget(Gtk.Box):
 
     def _on_buffer_changed(self, buffer):
         """Call all registered callbacks when text changes."""
+        # Store current scroll position
+        if self._scroll_adjustment and not self._prevent_scroll_reset:
+            current_value = self._scroll_adjustment.get_value()
+            
         # Update statistics
         self._update_stats()
-
+    
         # Call text changed callbacks
         for callback in self._text_changed_callbacks:
             callback(self.get_text())
+        
+        # Restore scroll position if it changed unexpectedly
+        if self._scroll_adjustment and not self._prevent_scroll_reset:
+            # Use idle_add to restore after GTK's internal scroll adjustments
+            def restore_scroll():
+                if hasattr(self, '_stored_scroll_value'):
+                    self._scroll_adjustment.set_value(current_value)
+                return False
+            GLib.idle_add(restore_scroll)
+
 
     def _on_hide_webview_clicked(self) -> None:
         """Toggle webview visibility."""
@@ -329,11 +365,25 @@ class SidebarWidget(Gtk.Box):
         return self.buffer.get_text(start_iter, end_iter, True)
 
     def set_text(self, text: str):
-        """Set text and trigger callbacks."""
+        """Set text without triggering scroll reset."""
+        self._prevent_scroll_reset = True
+        
+        # Store current scroll before changing text
+        if self._scroll_adjustment:
+            stored_scroll = self._scroll_adjustment.get_value()
+        
         self.buffer.set_text(text)
         self._update_stats()
+        
+        # # Restore scroll position
+        # if self._scroll_adjustment:
+        #     GLib.idle_add(lambda: self._scroll_adjustment.set_value(stored_scroll) or False)
+        
         for callback in self._text_changed_callbacks:
             callback(text)
+        
+        # Re-enable after delay
+        GLib.timeout_add(100, lambda: setattr(self, "_prevent_scroll_reset", False))
 
     def clear(self):
         self.buffer.set_text("")
@@ -341,17 +391,24 @@ class SidebarWidget(Gtk.Box):
         for callback in self._text_changed_callbacks:
             callback("")
 
-    def get_cursor_position(self):
-        """Get cursor position offset."""
-        cursor = self.buffer.get_iter_at_mark(self.buffer.get_insert())
-        return cursor.get_offset()
+    # def get_cursor_position(self):
+    #     """Get cursor position offset."""
+    #     cursor = self.buffer.get_iter_at_mark(self.buffer.get_insert())
+    #     return cursor.get_offset()
 
-    def set_cursor_position(self, offset):
-        """Set cursor position."""
-        cursor_iter = self.buffer.get_iter_at_offset(offset)
-        self.buffer.place_cursor(cursor_iter)
-
-    def _apply_theme(self, dark: bool):
-        """Apply dark/light theme to the textview."""
-        # This method can be called from window.py to update theme
-        pass
+    # def set_cursor_position(self, offset):
+    #     """Set cursor position without resetting scroll."""
+    #     self._prevent_scroll_reset = True
+        
+    #     # Store scroll position
+    #     if self._scroll_adjustment:
+    #         stored_scroll = self._scroll_adjustment.get_value()
+        
+    #     cursor_iter = self.buffer.get_iter_at_offset(offset)
+    #     self.buffer.place_cursor(cursor_iter)
+        
+    #     # Restore scroll after cursor placement
+    #     if self._scroll_adjustment:
+    #         GLib.idle_add(lambda: self._scroll_adjustment.set_value(stored_scroll) or False)
+        
+    #     GLib.timeout_add(100, lambda: setattr(self, "_prevent_scroll_reset", False))
