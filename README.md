@@ -1,6 +1,6 @@
 # ProPad
 
-![ProPad Banner](img.png)
+![ProPad Banner](https://raw.githubusercontent.com/Sanjai-Shaarugesh/ProPad/eb5948f967352492a34ee0a7b810811a4336a4c3/icons/hicolor/scalable/apps/io.github.sanjai.ProPad.svg)
 
 A modern, feature-rich Markdown editor built with GTK 4, Python, and Libadwaita. ProPad combines a clean, intuitive interface with powerful features for an exceptional writing experience.
 
@@ -49,6 +49,22 @@ A modern, feature-rich Markdown editor built with GTK 4, Python, and Libadwaita.
 - **Distraction-Free Mode** - Focus on writing without distractions
 - **Rich Formatting Toolbar** - Quick access to common formatting options
 - **File Manager Sidebar** - Organize and navigate your documents easily
+-
+- <img width="1920" height="1080" alt="table" src="https://github.com/user-attachments/assets/ec25f654-9e9a-4c07-bf50-eeca0d38e668" />
+<img width="1075" height="756" alt="mermaid-latex" src="https://github.com/user-attachments/assets/cf2bdd34-328f-41bc-a9d4-c75a0a9d4220" />
+<img width="1920" height="1080" alt="mermaid" src="https://github.com/user-attachments/assets/1c871aa8-11ed-4466-8e0e-e1f75cac2629" />
+<img width="1201" height="872" alt="main-window" src="https://github.com/user-attachments/assets/a4b931f7-1dbb-4d8a-b6f8-ac702f9217dc" />
+<img width="1201" height="872" alt="light" src="https://github.com/user-attachments/assets/db838193-faf2-4087-bb89-d563a177ca21" />
+<img width="1920" height="1080" alt="latex" src="https://github.com/user-attachments/assets/a904d116-eed4-4789-bc4f-863066a7df11" />
+<img width="1080" height="755" alt="keyboard-shorcuts" src="https://github.com/user-attachments/assets/6e90fd69-eb83-4883-a974-eaa6805cf3eb" />
+<img width="1080" height="755" alt="formatting" src="https://github.com/user-attachments/assets/2a8b807e-7cc3-404b-9b4c-b5b0ab322e93" />
+<img width="1080" height="755" alt="file-manager" src="https://github.com/user-attachments/assets/89ac839e-c63c-4411-866b-b2510888db53" />
+<img width="1075" height="756" alt="file-history" src="https://github.com/user-attachments/assets/78dc4f1f-63ed-42eb-bce5-8fa3da2624cc" />
+
+<img width="1201" height="872" alt="dark-mode" src="https://github.com/user-attachments/assets/071a2c55-f2e0-4c91-a32c-400e7857ad86" />
+<img width="1080" height="755" alt="file-export" src="https://github.com/user-attachments/assets/e7ecb467-034f-4acf-834b-7d98fa855c31" />
+
+- 
 
 ### 🔧 Productivity Tools
 - **Advanced Search & Replace** - Find and modify text with regex support
@@ -80,7 +96,7 @@ flatpak run io.github.sanjai.ProPad
 - Python 3.10 or higher
 - GTK 4.10+
 - Libadwaita 1.4+
-- JUstFile
+- Just
 
 #### Dependencies
 
@@ -113,20 +129,9 @@ git clone https://github.com/Sanjai-Shaarugesh/propad.git
 cd propad
 ```
 
-2. Build with Meson:
+2. Build & Install with just:
 ```bash
-meson setup builddir --prefix=/usr
-meson compile -C builddir
-```
-
-3. Install:
-```bash
-sudo meson install -C builddir
-```
-
-4. Run:
-```bash
-propad
+  just flatpak-install
 ```
 
 ## 🚀 Quick Start
@@ -234,7 +239,7 @@ If you find ProPad useful, consider supporting the project:
 - **Developer**: Sanjai Shaarugesh
 - **Email**: shaarugesh6@gmail.com
 - **GitHub**: [@Sanjai-Shaarugesh](https://github.com/Sanjai-Shaarugesh)
-- **Discussions**: [GitHub Discussions](https://github.com/Sanjai-Shaarugesh/propad/discussions)
+- **Discussions**: [GitHub Discussions](https://github.com/Sanjai-Shaarugesh/ProPad/discussions)
 
 ## 🗺️ Roadmap
 
@@ -254,6 +259,6 @@ If you find ProPad useful, consider supporting the project:
 
 **Made with ❤️ by the ProPad Community**
 
-[Website](https://github.com/Sanjai-Shaarugesh/propad) • [Report Bug](https://github.com/Sanjai-Shaarugesh/propad/issues) • [Request Feature](https://github.com/Sanjai-Shaarugesh/propad/issues)
+[Website](https://github.com/Sanjai-Shaarugesh/propad) • [Report Bug](https://github.com/Sanjai-Shaarugesh/ProPad/issues) • [Request Feature](https://github.com/Sanjai-Shaarugesh/ProPad/issues)
 
 </div>
